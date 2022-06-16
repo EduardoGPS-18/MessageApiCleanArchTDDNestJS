@@ -1,3 +1,3 @@
 export class RepositoryError {
-  static InsertError = class InsertError extends Error {};
+  static OperationError = class OperationError extends Error {};
 }

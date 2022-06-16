@@ -70,7 +70,7 @@ describe('AddUser Use Case', () => {
     const { sut, userRepositoryStub } = makeSut();
     jest
       .spyOn(userRepositoryStub, 'insert')
-      .mockRejectedValueOnce(new RepositoryError.InsertError());
+      .mockRejectedValueOnce(new RepositoryError.OperationError());
     const promise = sut.execute({
       email: 'user_email',
       name: 'user_name',
