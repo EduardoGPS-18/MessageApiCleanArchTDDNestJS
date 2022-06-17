@@ -2,12 +2,12 @@ import { EntitySchema } from 'typeorm';
 import { UserEntity } from '../../../../domain/entities';
 
 export const UserSchema = new EntitySchema<UserEntity>({
-  name: 'user',
+  name: UserEntity.name,
+  tableName: 'user',
   target: UserEntity,
   columns: {
     id: {
-      type: 'varchar',
-      length: 255,
+      type: 'uuid',
       nullable: false,
       primary: true,
       unique: true,

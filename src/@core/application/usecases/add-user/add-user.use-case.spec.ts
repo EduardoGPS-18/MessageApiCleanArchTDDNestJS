@@ -6,7 +6,6 @@ import { RepositoryError } from '../../../../@core/domain/errors/repository.erro
 import { AddUserUseCase } from '.';
 import { UserEntity } from '../../../../@core/domain/entities';
 import { UserRepository } from '../../../../@core/domain/repositories';
-import { ProtocolError } from '../../error';
 import { Hasher } from '../../protocols';
 
 jest.mock('crypto', () => ({
@@ -81,9 +80,7 @@ describe('AddUser Use Case', () => {
 
   it('Should throw if hasher throws', async () => {
     const { sut, hasherStub } = makeSut();
-    jest
-      .spyOn(hasherStub, 'hash')
-      .mockRejectedValueOnce(new ProtocolError.HashError());
+    jest.spyOn(hasherStub, 'hash').mockRejectedValueOnce(new Error());
     const promise = sut.execute({
       email: 'user_email',
       name: 'user_name',

@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { DataSource } from 'typeorm';
 import { UserEntity } from '../../../../domain/entities';
 import { UserRepository } from '../../../../domain/repositories';
@@ -42,7 +43,7 @@ describe('User Schema', () => {
   it('Should save user with orm', async () => {
     const { sut } = await makeSut();
     const user = UserEntity.create({
-      id: 'any_id',
+      id: crypto.randomUUID(),
       name: 'any_name',
       email: 'any_mail',
       password: 'any_password',
