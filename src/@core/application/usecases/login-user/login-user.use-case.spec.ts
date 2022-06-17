@@ -99,17 +99,21 @@ describe('Login User Usecase', () => {
     await expect(promise).rejects.toThrowError(DomainError.Unexpected);
   });
 
-  it('Should returns user on ', async () => {
+  it('Should returns user on succeed', async () => {
     const { sut, userRepositoryStub } = makeSut();
-    jest
-      .spyOn(userRepositoryStub, 'findOneByEmail')
-      .mockRejectedValueOnce(new RepositoryError.OperationError());
 
-    const promise = sut.execute({
+    const user = await sut.execute({
       email: 'any_mail',
       rawPassword: 'any_pass',
     });
 
-    await expect(promise).rejects.toThrowError(DomainError.Unexpected);
+    expect(user).toEqual({
+      id: 'any_id',
+      name: 'any_name',
+      email: 'any_email',
+      password: 'any_hash',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   });
 });

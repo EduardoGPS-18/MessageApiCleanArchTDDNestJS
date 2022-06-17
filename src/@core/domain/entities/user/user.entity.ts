@@ -19,6 +19,10 @@ export class UserEntity {
     createUser: CreateUserProps,
     datemetadata: DateMetadataProps,
   ) {
+    if (!createUser && !datemetadata) {
+      // Used Form Orm
+      return;
+    }
     const { id, name, email, password } = createUser;
     const { createdAt, updatedAt } = datemetadata;
     this.id = id;

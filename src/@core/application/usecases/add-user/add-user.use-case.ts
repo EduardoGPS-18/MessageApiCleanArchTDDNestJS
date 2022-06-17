@@ -11,6 +11,10 @@ export type AddUserProps = {
   rawPassword: string;
 };
 
+export abstract class AddUserUseCaseI {
+  abstract execute(props: AddUserProps): Promise<UserEntity>;
+}
+
 export class AddUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
@@ -34,7 +38,7 @@ export class AddUserUseCase {
       if (err instanceof DomainError.CredentialsAlreadyInUse) {
         throw err;
       }
-      throw new DomainError.CreateUserError();
+      throw new DomainError.Unexpected();
     }
   }
 }

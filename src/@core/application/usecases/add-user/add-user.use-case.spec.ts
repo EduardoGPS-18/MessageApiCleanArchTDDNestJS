@@ -76,7 +76,7 @@ describe('AddUser Use Case', () => {
       name: 'user_name',
       rawPassword: 'user_pass',
     });
-    await expect(promise).rejects.toThrowError(DomainError.CreateUserError);
+    await expect(promise).rejects.toThrowError(DomainError.Unexpected);
   });
 
   it('Should throw if hasher throws', async () => {
@@ -89,7 +89,7 @@ describe('AddUser Use Case', () => {
       name: 'user_name',
       rawPassword: 'user_pass',
     });
-    await expect(promise).rejects.toThrowError(DomainError.CreateUserError);
+    await expect(promise).rejects.toThrowError(DomainError.Unexpected);
   });
 
   it('Should thorws if email exists in repository', async () => {
