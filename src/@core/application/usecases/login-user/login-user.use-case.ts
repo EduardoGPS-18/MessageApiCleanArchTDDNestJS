@@ -41,7 +41,6 @@ export class LoginUserUseCase implements LoginUserUseCaseI {
       await this.userRepository.update(user);
       return user;
     } catch (err) {
-      console.log(err);
       if (err instanceof DomainError.InvalidCredentials) {
         throw err;
       }

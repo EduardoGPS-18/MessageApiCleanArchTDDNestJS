@@ -18,6 +18,7 @@ import { UserRepository } from './@core/domain/repositories';
 import { BcryptAdapter } from './@core/infra/adapters/bcrypt';
 import { JwtSessionHandlerAdapter } from './@core/infra/adapters/session';
 import { OrmUserRepositoryAdapter } from './@core/infra/db/repositories/user';
+import { GroupScheme } from './@core/infra/db/typeorm/group';
 import { UserSchema } from './@core/infra/db/typeorm/user';
 import { LoginController } from './@core/infra/http/controllers/login';
 import { SignupController } from './@core/infra/http/controllers/signup';
@@ -51,7 +52,7 @@ import { SignupController } from './@core/infra/http/controllers/signup';
         autoLoadEntities: true,
       }),
     }),
-    TypeOrmModule.forFeature([UserSchema]),
+    TypeOrmModule.forFeature([UserSchema, GroupScheme]),
   ],
   providers: [
     {

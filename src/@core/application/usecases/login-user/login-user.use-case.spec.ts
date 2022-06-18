@@ -13,6 +13,12 @@ import { LoginUserUseCase } from './login-user.use-case';
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
 class UserRepositoryStub implements UserRepository {
+  findOneById(id: string): Promise<UserEntity> {
+    return;
+  }
+  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
+    return;
+  }
   update(user: UserEntity): Promise<void> {
     return;
   }

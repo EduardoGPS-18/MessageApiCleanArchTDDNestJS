@@ -3,4 +3,6 @@ export class DomainError {
 
   static InvalidCredentials = class InvalidCredentials extends Error {};
   static CredentialsAlreadyInUse = class CredentialsAlreadyInUse extends Error {};
+
+  static MissingGroupOwner = class MissingGroupOwner extends Error {};
 }

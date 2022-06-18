@@ -1,13 +1,15 @@
-import { DataSource, Repository } from 'typeorm';
+import * as crypto from 'crypto';
+import { DataSource, In, Repository } from 'typeorm';
 import { UserEntity } from '../../../../domain/entities';
 import { UserSchema } from '../../typeorm/user';
 import { OrmUserRepositoryAdapter } from './orm-user.adapter';
 
 type SutTypes = {
-  ormRepository: Repository<UserEntity>;
+  ormUserRepository: Repository<UserEntity>;
   sut: OrmUserRepositoryAdapter;
+  dataSource: DataSource;
 };
-const makeSut = async () => {
+const makeSut = async (): Promise<SutTypes> => {
   const dataSource = new DataSource({
     type: 'postgres',
     synchronize: true,
@@ -22,9 +24,9 @@ const makeSut = async () => {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();
   }
-  const userRepository = dataSource.getRepository(UserEntity);
-  const sut = new OrmUserRepositoryAdapter(userRepository);
-  return { sut, userRepository };
+  const ormUserRepository = dataSource.getRepository(UserEntity);
+  const sut = new OrmUserRepositoryAdapter(ormUserRepository);
+  return { sut, ormUserRepository, dataSource };
 };
 
 describe('Orm User Repository adapter', () => {
@@ -38,56 +40,98 @@ describe('Orm User Repository adapter', () => {
     session: 'any_session',
     updateSession(session: string): void {},
   };
-  describe('FindOneByEmail', () => {
-    beforeEach(async () => {
-      const { userRepository } = await makeSut();
-      userRepository.clear();
-    });
 
+  describe('FindOneByEmail', () => {
     it('Should call orm with correct values', async () => {
-      const { sut, userRepository } = await makeSut();
-      jest.spyOn(userRepository, 'findOneBy').mockResolvedValueOnce(mockedUser);
+      const { sut, ormUserRepository } = await makeSut();
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockResolvedValueOnce(mockedUser);
 
       await sut.findOneByEmail('any_email');
-      expect(userRepository.findOneBy).toHaveBeenCalledWith({
+      expect(ormUserRepository.findOneBy).toHaveBeenCalledWith({
         email: 'any_email',
       });
     });
 
     it('Should return same of orm', async () => {
-      const { sut, userRepository } = await makeSut();
+      const { sut, ormUserRepository } = await makeSut();
 
-      jest.spyOn(userRepository, 'findOneBy').mockResolvedValueOnce(mockedUser);
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockResolvedValueOnce(mockedUser);
 
       const user = await sut.findOneByEmail(mockedUser.email);
       expect(user).toEqual(mockedUser);
     });
   });
 
-  describe('Insert', () => {
-    beforeEach(async () => {
-      const { userRepository } = await makeSut();
-      userRepository.clear();
+  describe('FindOneById', () => {
+    it('Should call orm with correct values', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockResolvedValueOnce(mockedUser);
+
+      await sut.findOneById('any_id');
+      expect(ormUserRepository.findOneBy).toHaveBeenCalledWith({
+        id: 'any_id',
+      });
     });
+
+    it('Should return same of orm', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockResolvedValueOnce(mockedUser);
+
+      const user = await sut.findOneById(mockedUser.id);
+      expect(user).toEqual(mockedUser);
+    });
+  });
+
+  describe('FindUserListByIdList', () => {
+    it('Should call orm with correct values', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      const uuidUser1 = crypto.randomUUID();
+      const uuidUser2 = crypto.randomUUID();
+      jest.spyOn(ormUserRepository, 'findBy');
+
+      await sut.findUserListByIdList([uuidUser1, uuidUser2]);
+      expect(ormUserRepository.findBy).toHaveBeenCalledWith({
+        id: In([uuidUser1, uuidUser2]),
+      });
+    });
+
+    it('Should return same of orm', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockResolvedValueOnce(mockedUser);
+
+      const user = await sut.findOneById(mockedUser.id);
+      expect(user).toEqual(mockedUser);
+    });
+  });
+
+  describe('Insert', () => {
     it('Should integrate correctly with orm', async () => {
-      const { sut, userRepository } = await makeSut();
-      jest.spyOn(userRepository, 'save').mockResolvedValueOnce(mockedUser);
+      const { sut, ormUserRepository } = await makeSut();
+      jest.spyOn(ormUserRepository, 'save').mockResolvedValueOnce(mockedUser);
       const result = await sut.insert(mockedUser);
-      expect(userRepository.save).toHaveBeenCalledWith(mockedUser);
+      expect(ormUserRepository.save).toHaveBeenCalledWith(mockedUser);
       expect(result).toBeUndefined();
     });
   });
 
   describe('Update', () => {
-    beforeEach(async () => {
-      const { userRepository } = await makeSut();
-      userRepository.clear();
-    });
     it('Should integrate correctly with orm', async () => {
-      const { sut, userRepository } = await makeSut();
-      jest.spyOn(userRepository, 'save').mockResolvedValueOnce(mockedUser);
+      const { sut, ormUserRepository } = await makeSut();
+      jest.spyOn(ormUserRepository, 'save').mockResolvedValueOnce(mockedUser);
       const result = await sut.update(mockedUser);
-      expect(userRepository.save).toHaveBeenCalledWith(mockedUser);
+      expect(ormUserRepository.save).toHaveBeenCalledWith(mockedUser);
       expect(result).toBeUndefined();
     });
   });

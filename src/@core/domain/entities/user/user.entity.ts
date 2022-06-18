@@ -1,7 +1,5 @@
 import { DateMetadataProps } from '../helpers';
 
-//TODO: add session on user
-
 export type CreateUserProps = {
   id: string;
   name: string;

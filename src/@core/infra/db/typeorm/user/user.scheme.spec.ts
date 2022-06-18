@@ -5,7 +5,7 @@ import { UserRepository } from '../../../../domain/repositories';
 import { UserSchema } from './user.scheme';
 
 jest.setTimeout(15000);
-
+jest.useRealTimers();
 type SutTypes = {
   sut: UserRepository;
   dataSource: DataSource;
@@ -30,16 +30,6 @@ const makeSut = async () => {
 };
 
 describe('User Schema', () => {
-  beforeEach(async () => {
-    const { sut } = await makeSut();
-    sut.clear();
-  });
-
-  afterAll(async () => {
-    const { sut } = await makeSut();
-    sut.clear();
-  });
-
   it('Should save user with orm', async () => {
     const { sut } = await makeSut();
     const user = UserEntity.create({
