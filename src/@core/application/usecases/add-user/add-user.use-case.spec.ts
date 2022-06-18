@@ -1,12 +1,12 @@
 import * as crypto from 'crypto'; // (* as mod) CUIDADO AO IMPORTAR !
 
-import { DomainError } from '../../../../@core/domain/errors/domain.error';
-import { RepositoryError } from '../../../../@core/domain/errors/repository.error';
+import { DomainError } from '../../../domain/errors/domain.error';
+import { RepositoryError } from '../../../domain/errors/repository.error';
 
 import { AddUserUseCase } from '.';
-import { UserEntity } from '../../../../@core/domain/entities';
-import { UserRepository } from '../../../../@core/domain/repositories';
-import { Hasher } from '../../protocols';
+import { UserEntity } from '../../../domain/entities';
+import { UserRepository } from '../../../domain/repositories';
+import { Hasher, Payload, SessionHandler } from '../../protocols';
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn(() => 'gen_uuid'),
@@ -14,6 +14,9 @@ jest.mock('crypto', () => ({
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
 class UserRepositoryStub implements UserRepository {
+  update(user: UserEntity): Promise<void> {
+    return;
+  }
   insert(user: UserEntity): Promise<void> {
     return;
   }
@@ -28,24 +31,38 @@ class HasherStub implements Hasher {
   }
 }
 
+class SessionHandlerStub implements SessionHandler {
+  generateSession(payload: Payload): string {
+    return 'generated_session';
+  }
+}
+
 type SutTypes = {
   sut: AddUserUseCase;
   hasherStub: HasherStub;
   userRepositoryStub: UserRepositoryStub;
+  sessionHandlerStub: SessionHandlerStub;
 };
 const makeSut = (): SutTypes => {
   const userRepositoryStub = new UserRepositoryStub();
   const hasherStub = new HasherStub();
-  const sut = new AddUserUseCase(userRepositoryStub, hasherStub);
-  return { sut, hasherStub, userRepositoryStub };
+  const sessionHandlerStub = new SessionHandlerStub();
+  const sut = new AddUserUseCase(
+    userRepositoryStub,
+    hasherStub,
+    sessionHandlerStub,
+  );
+  return { sut, hasherStub, userRepositoryStub, sessionHandlerStub };
 };
 
 describe('AddUser Use Case', () => {
   it('Should call dependencies with correct values', async () => {
-    const { sut, hasherStub, userRepositoryStub } = makeSut();
+    const { sut, hasherStub, userRepositoryStub, sessionHandlerStub } =
+      makeSut();
     jest.spyOn(hasherStub, 'hash');
     jest.spyOn(userRepositoryStub, 'insert');
     jest.spyOn(userRepositoryStub, 'findOneByEmail');
+    jest.spyOn(sessionHandlerStub, 'generateSession');
 
     await sut.execute({
       email: 'user_email',
@@ -55,12 +72,17 @@ describe('AddUser Use Case', () => {
 
     expect(hasherStub.hash).toHaveBeenCalledWith('user_pass');
     expect(crypto.randomUUID).toHaveBeenCalled();
+    expect(sessionHandlerStub.generateSession).toHaveBeenCalledWith({
+      id: 'gen_uuid',
+      email: 'user_email',
+    });
     expect(userRepositoryStub.findOneByEmail).toBeCalledWith('user_email');
     const expectedUser: UserEntity = UserEntity.create({
       id: 'gen_uuid',
       name: 'user_name',
       email: 'user_email',
       password: 'gen_hash',
+      session: 'generated_session',
     });
     expect(userRepositoryStub.insert).toHaveBeenCalledWith(expectedUser);
   });
@@ -97,6 +119,8 @@ describe('AddUser Use Case', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       name: 'any_name',
+      session: 'any_session',
+      updateSession: jest.fn(),
       password: 'any_pass',
     });
     const promise = sut.execute({
@@ -121,6 +145,7 @@ describe('AddUser Use Case', () => {
       email: 'user_email',
       name: 'user_name',
       password: 'gen_hash',
+      session: 'generated_session',
       createdAt: new Date('2020-01-01'),
       updatedAt: new Date('2020-01-01'),
     });

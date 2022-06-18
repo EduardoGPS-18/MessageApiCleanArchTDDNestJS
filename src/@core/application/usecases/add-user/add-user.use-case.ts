@@ -1,9 +1,9 @@
 import * as crypto from 'crypto';
 
-import { UserEntity } from '../../../../@core/domain/entities';
-import { DomainError } from '../../../../@core/domain/errors/domain.error';
-import { UserRepository } from '../../../../@core/domain/repositories';
-import { Hasher } from '../../protocols';
+import { UserEntity } from '../../../domain/entities';
+import { DomainError } from '../../../domain/errors/domain.error';
+import { UserRepository } from '../../../domain/repositories';
+import { Hasher, SessionHandler } from '../../protocols';
 
 export type AddUserProps = {
   name: string;
@@ -19,6 +19,7 @@ export class AddUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly hasher: Hasher,
+    private readonly sessionHandler: SessionHandler,
   ) {}
 
   async execute(props: AddUserProps): Promise<UserEntity> {
@@ -30,8 +31,12 @@ export class AddUserUseCase {
       }
 
       const id = crypto.randomUUID();
+      const session = this.sessionHandler.generateSession({
+        id,
+        email,
+      });
       const password = await this.hasher.hash(rawPassword);
-      const user = UserEntity.create({ id, email, name, password });
+      const user = UserEntity.create({ id, email, name, password, session });
       await this.userRepository.insert(user);
       return user;
     } catch (err) {

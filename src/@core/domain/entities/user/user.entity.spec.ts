@@ -1,5 +1,7 @@
 import { UserEntity } from './user.entity';
 
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
 describe('User Entity Test', () => {
   it('Should create a user with correct data', () => {
     const id = 'any_id';

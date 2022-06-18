@@ -17,9 +17,10 @@ class AddUserUsecaseStub implements AddUserUseCaseI {
       name: 'any_name',
       password: 'any_password',
       email: 'any_email',
-
+      session: 'any_session',
       updatedAt: new Date(),
       createdAt: new Date(),
+      updateSession: jest.fn(),
     };
   }
 }
@@ -95,6 +96,7 @@ describe('Signup Controller', () => {
       id: 'any_id',
       email: 'any_email',
       name: 'any_name',
+      accessToken: 'any_session',
     });
   });
 });

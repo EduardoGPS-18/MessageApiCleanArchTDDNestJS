@@ -19,6 +19,8 @@ class LoginUserUseCaseStub implements LoginUserUseCaseI {
       createdAt: new Date(),
       updatedAt: new Date(),
       password: 'any_password',
+      session: 'any_session',
+      updateSession: jest.fn(),
     });
   }
 }
@@ -60,6 +62,7 @@ describe('Login Controller', () => {
       id: 'any_id',
       name: 'any_name',
       email: 'any_email',
+      accessToken: 'any_session',
     });
   });
 

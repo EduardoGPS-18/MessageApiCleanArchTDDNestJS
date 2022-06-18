@@ -36,5 +36,10 @@ export const UserSchema = new EntitySchema<UserEntity>({
       type: 'timestamp with time zone',
       nullable: false,
     },
+    session: {
+      type: 'varchar',
+      nullable: true,
+      length: 255,
+    },
   },
 });

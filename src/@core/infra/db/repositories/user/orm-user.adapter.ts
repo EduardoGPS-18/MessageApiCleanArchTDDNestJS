@@ -5,6 +5,10 @@ import { UserRepository } from '../../../../../@core/domain/repositories';
 export class OrmUserRepositoryAdapter implements UserRepository {
   constructor(private ormRepository: Repository<UserEntity>) {}
 
+  async update(user: UserEntity): Promise<void> {
+    await this.ormRepository.save(user);
+  }
+
   async insert(user: UserEntity): Promise<void> {
     await this.ormRepository.save(user);
   }

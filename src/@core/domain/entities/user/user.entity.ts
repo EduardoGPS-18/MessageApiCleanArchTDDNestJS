@@ -7,6 +7,7 @@ export type CreateUserProps = {
   name: string;
   email: string;
   password: string;
+  session?: string;
 };
 
 export class UserEntity {
@@ -14,6 +15,7 @@ export class UserEntity {
   name: string;
   email: string;
   password: string;
+  session?: string;
   createdAt: Date;
   updatedAt: Date;
 
@@ -25,7 +27,7 @@ export class UserEntity {
       // Used Form Orm
       return;
     }
-    const { id, name, email, password } = createUser;
+    const { id, name, email, password, session } = createUser;
     const { createdAt, updatedAt } = datemetadata;
     this.id = id;
     this.name = name;
@@ -33,11 +35,16 @@ export class UserEntity {
     this.password = password;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.session = session;
   }
 
   static create(props: CreateUserProps): UserEntity {
     const now = new Date();
     const metadata = { createdAt: now, updatedAt: now };
     return new UserEntity(props, metadata);
+  }
+
+  updateSession(session: string): void {
+    this.session = session;
   }
 }

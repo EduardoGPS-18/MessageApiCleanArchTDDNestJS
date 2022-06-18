@@ -35,6 +35,8 @@ describe('Orm User Repository adapter', () => {
     password: 'any_password',
     createdAt: new Date(),
     updatedAt: new Date(),
+    session: 'any_session',
+    updateSession(session: string): void {},
   };
   describe('FindOneByEmail', () => {
     beforeEach(async () => {
@@ -71,6 +73,20 @@ describe('Orm User Repository adapter', () => {
       const { sut, userRepository } = await makeSut();
       jest.spyOn(userRepository, 'save').mockResolvedValueOnce(mockedUser);
       const result = await sut.insert(mockedUser);
+      expect(userRepository.save).toHaveBeenCalledWith(mockedUser);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('Update', () => {
+    beforeEach(async () => {
+      const { userRepository } = await makeSut();
+      userRepository.clear();
+    });
+    it('Should integrate correctly with orm', async () => {
+      const { sut, userRepository } = await makeSut();
+      jest.spyOn(userRepository, 'save').mockResolvedValueOnce(mockedUser);
+      const result = await sut.update(mockedUser);
       expect(userRepository.save).toHaveBeenCalledWith(mockedUser);
       expect(result).toBeUndefined();
     });
