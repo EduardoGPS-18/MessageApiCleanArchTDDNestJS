@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { MessageEntity } from 'src/@core/domain/entities';
+import { MessageEntity } from '../../../domain/entities';
 import { GroupEntity } from '../../../domain/entities/group';
 import { DomainError } from '../../../domain/errors/domain.error';
 import { GroupRepository, UserRepository } from '../../../domain/repositories';

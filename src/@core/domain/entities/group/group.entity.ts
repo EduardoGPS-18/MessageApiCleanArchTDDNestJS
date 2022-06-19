@@ -41,6 +41,11 @@ export class GroupEntity {
     this.updatedAt = updatedAt;
   }
 
+  isUserInGroup(user: UserEntity): boolean {
+    if (user.id === this.owner.id) return true;
+    return this.users.map((user) => user.id).includes(user.id);
+  }
+
   addUserListOnGroup(users: UserEntity[]) {
     users.map((user) => {
       if (!this.users.includes(user)) {

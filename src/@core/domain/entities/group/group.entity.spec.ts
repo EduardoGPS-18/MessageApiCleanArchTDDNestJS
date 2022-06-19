@@ -103,4 +103,80 @@ describe('Group entity', () => {
     group.addUserListOnGroup([userToAdd, userToAdd, anotherUser]);
     expect(group.users).toMatchObject([userToAdd, anotherUser]);
   });
+
+  describe('is user is in group', () => {
+    it('Should return false if user isnt in group', () => {
+      const user1 = UserEntity.create({
+        id: 'any_user_id_1',
+        email: 'any_user_email_1',
+        name: 'any_user_name_1',
+        password: 'any_user_password_1',
+        session: 'any_user_session_1',
+      });
+
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: UserEntity.create({
+          id: 'any_user_id',
+          email: 'any_user_email',
+          name: 'any_user_name',
+          password: 'any_user_password',
+          session: 'any_user_session',
+        }),
+        users: [],
+      });
+
+      expect(group.isUserInGroup(user1)).toBe(false);
+    });
+
+    it('Should return true if user is the group owner', () => {
+      const owner = UserEntity.create({
+        id: 'any_user_id',
+        email: 'any_user_email',
+        name: 'any_user_name',
+        password: 'any_user_password',
+        session: 'any_user_session',
+      });
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: owner,
+        users: [],
+      });
+
+      expect(group.isUserInGroup(owner)).toBe(true);
+    });
+
+    it('Should return true if user is in group', () => {
+      const user1 = UserEntity.create({
+        id: 'any_user_id_1',
+        email: 'any_user_email_1',
+        name: 'any_user_name_1',
+        password: 'any_user_password_1',
+        session: 'any_user_session_1',
+      });
+
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: UserEntity.create({
+          id: 'any_user_id',
+          email: 'any_user_email',
+          name: 'any_user_name',
+          password: 'any_user_password',
+          session: 'any_user_session',
+        }),
+        users: [user1],
+      });
+
+      expect(group.isUserInGroup(user1)).toBe(true);
+    });
+  });
 });

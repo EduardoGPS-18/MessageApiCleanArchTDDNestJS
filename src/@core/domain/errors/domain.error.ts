@@ -6,4 +6,8 @@ export class DomainError {
   static CredentialsAlreadyInUse = class CredentialsAlreadyInUse extends Error {};
 
   static MissingGroupOwner = class MissingGroupOwner extends Error {};
+  static UserIsntInGroup = class UserIsntInGroup extends Error {};
+  static InvalidGroup = class InvalidGroup extends Error {};
+
+  static InvalidMessage = class InvalidGroup extends Error {};
 }

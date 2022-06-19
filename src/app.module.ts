@@ -19,18 +19,29 @@ import {
   CreateGroupUseCaseI,
 } from './@core/application/usecases/create-group';
 import {
+  SendMessageToGroupUseCase,
+  SendMessageToGroupUseCaseI,
+} from './@core/application/usecases/send-message-to-group';
+import {
   ValidateUserUseCase,
   ValidateUserUseCaseI,
 } from './@core/application/usecases/validate-user';
-import { GroupRepository, UserRepository } from './@core/domain/repositories';
+import {
+  GroupRepository,
+  MessageRepository,
+  UserRepository,
+} from './@core/domain/repositories';
 import { BcryptAdapter } from './@core/infra/adapters/bcrypt';
 import { JwtSessionHandlerAdapter } from './@core/infra/adapters/session';
 import { OrmGroupRepositoryAdapter } from './@core/infra/db/repositories/group';
+import { OrmMessageRepositoryAdapter } from './@core/infra/db/repositories/message';
 import { OrmUserRepositoryAdapter } from './@core/infra/db/repositories/user';
 import { GroupSchema } from './@core/infra/db/typeorm/group';
+import { MessageScheme } from './@core/infra/db/typeorm/message';
 import { UserSchema } from './@core/infra/db/typeorm/user';
 import { CreateGroupController } from './@core/infra/http/controllers/add-group';
 import { LoginController } from './@core/infra/http/controllers/login';
+import { SendMessageController } from './@core/infra/http/controllers/send-message';
 import { SignupController } from './@core/infra/http/controllers/signup';
 import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
 
@@ -63,7 +74,7 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
         autoLoadEntities: true,
       }),
     }),
-    TypeOrmModule.forFeature([UserSchema, GroupSchema]),
+    TypeOrmModule.forFeature([UserSchema, GroupSchema, MessageScheme]),
   ],
   providers: [
     //PROTOCOLS
@@ -88,6 +99,14 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       useFactory: (dataSource: DataSource) => {
         const ormGroupRepo = dataSource.getRepository(GroupSchema);
         return new OrmGroupRepositoryAdapter(ormGroupRepo);
+      },
+      inject: [getDataSourceToken()],
+    },
+    {
+      provide: MessageRepository,
+      useFactory: (dataSource: DataSource) => {
+        const ormMessageRepo = dataSource.getRepository(MessageScheme);
+        return new OrmMessageRepositoryAdapter(ormMessageRepo);
       },
       inject: [getDataSourceToken()],
     },
@@ -123,6 +142,21 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       inject: [UserRepository, Encrypter, SessionHandler],
     },
     {
+      provide: SendMessageToGroupUseCaseI,
+      useFactory: (
+        groupRepository: GroupRepository,
+        userRepository: UserRepository,
+        messageRepository: MessageRepository,
+      ) => {
+        return new SendMessageToGroupUseCase(
+          groupRepository,
+          userRepository,
+          messageRepository,
+        );
+      },
+      inject: [GroupRepository, UserRepository, MessageRepository],
+    },
+    {
       provide: ValidateUserUseCaseI,
       useFactory: (
         sessionHandler: SessionHandler,
@@ -147,6 +181,11 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       inject: [ValidateUserUseCaseI],
     },
   ],
-  controllers: [LoginController, SignupController, CreateGroupController],
+  controllers: [
+    LoginController,
+    SignupController,
+    CreateGroupController,
+    SendMessageController,
+  ],
 })
 export class AppModule {}

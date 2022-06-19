@@ -1,4 +1,4 @@
-import { UserEntity } from 'src/@core/domain/entities/';
+import { UserEntity } from '../../../domain/entities/';
 import { DomainError } from '../../../domain/errors/domain.error';
 import { UserRepository } from '../../../domain/repositories';
 import { SessionHandler } from '../../protocols';
