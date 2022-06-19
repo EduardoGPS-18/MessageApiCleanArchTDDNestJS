@@ -21,8 +21,10 @@ export class OrmMessageRepositoryAdapter implements MessageRepository {
       return await this.ormMessageRepository
         .createQueryBuilder('message')
         .andWhere('message.groupId = :groupId', { groupId: group.id })
+        .leftJoinAndSelect('message.sender', 'user')
         .getMany();
     } catch (err) {
+      console.log(err);
       throw new RepositoryError.OperationError();
     }
   }

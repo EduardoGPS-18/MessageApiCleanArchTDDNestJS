@@ -26,7 +26,9 @@ describe('OrmMessageRepository Adapter', () => {
     const { ormMessageRepository } = makeSut();
     ormMessageRepository.createQueryBuilder = jest.fn().mockReturnValue({
       andWhere: jest.fn().mockReturnValue({
-        getMany: jest.fn().mockReturnValue([]),
+        leftJoinAndSelect: jest.fn().mockReturnValueOnce({
+          getMany: jest.fn().mockReturnValueOnce([]),
+        }),
       }),
     });
     ormMessageRepository.findBy = jest.fn();
@@ -110,7 +112,9 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       ormMessageRepository.createQueryBuilder = jest.fn().mockReturnValue({
         andWhere: jest.fn().mockReturnValue({
-          getMany: jest.fn(),
+          leftJoinAndSelect: jest.fn().mockReturnValue({
+            getMany: jest.fn().mockReturnValue([]),
+          }),
         }),
       });
       const group = GroupEntity.create({
@@ -136,8 +140,16 @@ describe('OrmMessageRepository Adapter', () => {
       ).toHaveBeenCalledWith('message.groupId = :groupId', {
         groupId: group.id,
       });
+
       expect(
-        ormMessageRepository.createQueryBuilder().andWhere('any_where').getMany,
+        ormMessageRepository.createQueryBuilder().andWhere('any_where')
+          .leftJoinAndSelect,
+      ).toHaveBeenCalledWith('message.sender', 'user');
+      expect(
+        ormMessageRepository
+          .createQueryBuilder()
+          .andWhere('any_where')
+          .leftJoinAndSelect('any_join', 'any_alias').getMany,
       ).toHaveBeenCalledTimes(1);
     });
 
@@ -175,54 +187,56 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       ormMessageRepository.createQueryBuilder = jest.fn().mockReturnValueOnce({
         andWhere: jest.fn().mockReturnValueOnce({
-          getMany: jest.fn().mockReturnValueOnce([
-            MessageEntity.create({
-              content: 'any_content_1',
-              group: GroupEntity.create({
-                id: 'any_group',
-                description: 'any_description',
-                messages: [],
-                name: 'any_name',
-                owner: UserEntity.create({
-                  id: 'owner_id',
-                  email: 'owner_email',
-                  name: 'owner_name',
-                  password: 'owner_password',
+          leftJoinAndSelect: jest.fn().mockReturnValueOnce({
+            getMany: jest.fn().mockReturnValueOnce([
+              MessageEntity.create({
+                content: 'any_content_1',
+                group: GroupEntity.create({
+                  id: 'any_group',
+                  description: 'any_description',
+                  messages: [],
+                  name: 'any_name',
+                  owner: UserEntity.create({
+                    id: 'owner_id',
+                    email: 'owner_email',
+                    name: 'owner_name',
+                    password: 'owner_password',
+                  }),
+                  users: [],
                 }),
-                users: [],
-              }),
-              id: 'any_id_1',
-              sender: UserEntity.create({
-                id: 'any_user_id_1',
-                email: 'any_email_1',
-                name: 'any_name_1',
-                password: 'any_password_1',
-              }),
-            }),
-            MessageEntity.create({
-              content: 'any_content_2',
-              group: GroupEntity.create({
-                id: 'any_group',
-                description: 'any_description',
-                messages: [],
-                name: 'any_name',
-                owner: UserEntity.create({
-                  id: 'owner_id',
-                  email: 'owner_email',
-                  name: 'owner_name',
-                  password: 'owner_password',
+                id: 'any_id_1',
+                sender: UserEntity.create({
+                  id: 'any_user_id_1',
+                  email: 'any_email_1',
+                  name: 'any_name_1',
+                  password: 'any_password_1',
                 }),
-                users: [],
               }),
-              id: 'any_id_2',
-              sender: UserEntity.create({
-                id: 'any_user_id_2',
-                email: 'any_email_2',
-                name: 'any_name_2',
-                password: 'any_password_2',
+              MessageEntity.create({
+                content: 'any_content_2',
+                group: GroupEntity.create({
+                  id: 'any_group',
+                  description: 'any_description',
+                  messages: [],
+                  name: 'any_name',
+                  owner: UserEntity.create({
+                    id: 'owner_id',
+                    email: 'owner_email',
+                    name: 'owner_name',
+                    password: 'owner_password',
+                  }),
+                  users: [],
+                }),
+                id: 'any_id_2',
+                sender: UserEntity.create({
+                  id: 'any_user_id_2',
+                  email: 'any_email_2',
+                  name: 'any_name_2',
+                  password: 'any_password_2',
+                }),
               }),
-            }),
-          ]),
+            ]),
+          }),
         }),
       });
       const group = GroupEntity.create({

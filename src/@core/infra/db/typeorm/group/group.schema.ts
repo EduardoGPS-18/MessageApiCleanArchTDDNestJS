@@ -36,7 +36,7 @@ export const GroupSchema = new EntitySchema<GroupEntity>({
       target: MessageEntity.name,
       type: 'one-to-many',
       inverseSide: 'group',
-      eager: true,
+      eager: false,
       joinColumn: true,
     },
   },

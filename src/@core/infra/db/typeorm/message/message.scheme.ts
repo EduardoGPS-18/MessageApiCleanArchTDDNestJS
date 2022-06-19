@@ -14,7 +14,6 @@ export const MessageScheme = new EntitySchema<MessageEntity>({
     sender: {
       target: UserEntity.name,
       type: 'many-to-one',
-
       createForeignKeyConstraints: true,
       eager: true,
     },

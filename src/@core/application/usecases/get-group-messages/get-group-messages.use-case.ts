@@ -34,6 +34,7 @@ export class GetGroupMessageListUseCase implements GetGroupMessageListUseCaseI {
       if (!group) throw new DomainError.InvalidGroup();
       if (!group.isUserInGroup(user)) throw new DomainError.UserIsntInGroup();
       const messages = await this.messageRepository.findByGroup(group);
+
       return messages;
     } catch (err) {
       if (

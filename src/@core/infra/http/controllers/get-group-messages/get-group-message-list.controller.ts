@@ -38,7 +38,6 @@ export class GetGroupMessageListController {
         MessageMapper.toMessageOfGroupDto(message),
       );
     } catch (err) {
-      console.log(err);
       if (err instanceof DomainError.InvalidGroup) {
         throw new BadRequestException();
       }
