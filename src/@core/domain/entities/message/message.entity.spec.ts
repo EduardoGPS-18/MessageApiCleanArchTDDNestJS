@@ -1,4 +1,5 @@
 import { DomainError } from '../../errors/domain.error';
+import { GroupEntity } from '../group';
 import { MessageEntity } from '../message';
 import { UserEntity } from '../user';
 
@@ -8,8 +9,19 @@ describe('Message entity', () => {
   it('Should create a correct group', () => {
     const message = MessageEntity.create({
       id: 'any_id',
-      groupId: 'any_group_id',
-
+      group: GroupEntity.create({
+        id: 'any_group_id',
+        description: 'any_group_description',
+        messages: [],
+        name: 'any_group_name',
+        owner: UserEntity.create({
+          email: 'any_user_email',
+          id: 'any_user_id',
+          name: 'any_user_name',
+          password: 'any_user_password',
+        }),
+        users: [],
+      }),
       content: 'any_content',
       sender: UserEntity.create({
         id: 'any_user_id',
@@ -36,8 +48,19 @@ describe('Message entity', () => {
   it('Should throw if message content is empty', () => {
     const messageFactory = () =>
       MessageEntity.create({
-        groupId: 'any_group_id',
-
+        group: GroupEntity.create({
+          id: 'any_group_id',
+          description: 'any_group_description',
+          messages: [],
+          name: 'any_group_name',
+          owner: UserEntity.create({
+            email: 'any_user_email',
+            id: 'any_user_id',
+            name: 'any_user_name',
+            password: 'any_user_password',
+          }),
+          users: [],
+        }),
         id: 'any_id',
         content: '',
         sender: UserEntity.create({

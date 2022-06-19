@@ -1,6 +1,6 @@
 import { EntitySchema } from 'typeorm';
+import { MessageEntity, UserEntity } from '../../../../domain/entities';
 import { GroupEntity } from '../../../../domain/entities/group';
-import { MessageScheme } from '../message';
 import { UserSchema } from '../user';
 
 export const GroupSchema = new EntitySchema<GroupEntity>({
@@ -27,15 +27,18 @@ export const GroupSchema = new EntitySchema<GroupEntity>({
       },
     },
     owner: {
-      target: UserSchema,
+      target: UserEntity.name,
       type: 'many-to-one',
       eager: true,
     },
     messages: {
-      target: MessageScheme,
+      primary: true,
+      default: [],
+      target: MessageEntity.name,
       type: 'one-to-many',
-      inverseSide: 'groupId',
+      inverseSide: 'group',
       eager: true,
+      joinColumn: true,
     },
   },
   columns: {

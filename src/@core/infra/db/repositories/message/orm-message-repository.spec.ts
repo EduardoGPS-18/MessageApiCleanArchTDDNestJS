@@ -1,6 +1,10 @@
 import { DataSource, Repository } from 'typeorm';
 import { OrmMessageRepositoryAdapter } from '.';
-import { MessageEntity, UserEntity } from '../../../../domain/entities';
+import {
+  GroupEntity,
+  MessageEntity,
+  UserEntity,
+} from '../../../../domain/entities';
 import { RepositoryError } from '../../../../domain/errors/repository.error';
 import { MessageScheme } from '../../typeorm/message';
 
@@ -33,7 +37,19 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       const message = MessageEntity.create({
         content: 'any_content',
-        groupId: 'any_group_id',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
         id: 'any_id',
         sender: UserEntity.create({
           email: 'any_email',
@@ -56,7 +72,19 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       const message = MessageEntity.create({
         content: 'any_content',
-        groupId: 'any_group_id',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
         id: 'any_id',
         sender: UserEntity.create({
           email: 'any_email',
@@ -81,7 +109,19 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       const message = MessageEntity.create({
         content: 'any_content',
-        groupId: 'any_group_id',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
         id: 'any_id',
         sender: UserEntity.create({
           email: 'any_email',
@@ -102,7 +142,19 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       const message = MessageEntity.create({
         content: 'any_content',
-        groupId: 'any_group_id',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
         id: 'any_id',
         sender: UserEntity.create({
           email: 'any_email',
@@ -125,7 +177,19 @@ describe('OrmMessageRepository Adapter', () => {
       const { sut, ormMessageRepository } = makeSut();
       const message = MessageEntity.create({
         content: 'any_content',
-        groupId: 'any_group_id',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
         id: 'any_id',
         sender: UserEntity.create({
           email: 'any_email',
@@ -138,7 +202,19 @@ describe('OrmMessageRepository Adapter', () => {
       jest.spyOn(ormMessageRepository, 'findBy').mockResolvedValueOnce([
         MessageEntity.create({
           content: 'any_content_1',
-          groupId: 'any_group_1',
+          group: GroupEntity.create({
+            id: 'any_group',
+            description: 'any_description',
+            messages: [],
+            name: 'any_name',
+            owner: UserEntity.create({
+              id: 'owner_id',
+              email: 'owner_email',
+              name: 'owner_name',
+              password: 'owner_password',
+            }),
+            users: [],
+          }),
           id: 'any_id_1',
           sender: UserEntity.create({
             id: 'any_user_id_1',
@@ -149,7 +225,19 @@ describe('OrmMessageRepository Adapter', () => {
         }),
         MessageEntity.create({
           content: 'any_content_2',
-          groupId: 'any_group_2',
+          group: GroupEntity.create({
+            id: 'any_group',
+            description: 'any_description',
+            messages: [],
+            name: 'any_name',
+            owner: UserEntity.create({
+              id: 'owner_id',
+              email: 'owner_email',
+              name: 'owner_name',
+              password: 'owner_password',
+            }),
+            users: [],
+          }),
           id: 'any_id_2',
           sender: UserEntity.create({
             id: 'any_user_id_2',
@@ -163,7 +251,19 @@ describe('OrmMessageRepository Adapter', () => {
       expect(messages).toEqual([
         MessageEntity.create({
           content: 'any_content_1',
-          groupId: 'any_group_1',
+          group: GroupEntity.create({
+            id: 'any_group',
+            description: 'any_description',
+            messages: [],
+            name: 'any_name',
+            owner: UserEntity.create({
+              id: 'owner_id',
+              email: 'owner_email',
+              name: 'owner_name',
+              password: 'owner_password',
+            }),
+            users: [],
+          }),
           id: 'any_id_1',
           sender: UserEntity.create({
             id: 'any_user_id_1',
@@ -174,7 +274,19 @@ describe('OrmMessageRepository Adapter', () => {
         }),
         MessageEntity.create({
           content: 'any_content_2',
-          groupId: 'any_group_2',
+          group: GroupEntity.create({
+            id: 'any_group',
+            description: 'any_description',
+            messages: [],
+            name: 'any_name',
+            owner: UserEntity.create({
+              id: 'owner_id',
+              email: 'owner_email',
+              name: 'owner_name',
+              password: 'owner_password',
+            }),
+            users: [],
+          }),
           id: 'any_id_2',
           sender: UserEntity.create({
             id: 'any_user_id_2',

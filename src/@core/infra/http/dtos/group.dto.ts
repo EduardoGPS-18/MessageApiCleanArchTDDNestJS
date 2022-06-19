@@ -9,3 +9,11 @@ export class GroupDto {
   owner: LessUserDataDto;
   users: LessUserDataDto[];
 }
+
+export class GroupWithoutMessagesDto {
+  id: string;
+  name: string;
+  description: string;
+  owner: LessUserDataDto;
+  users: LessUserDataDto[];
+}

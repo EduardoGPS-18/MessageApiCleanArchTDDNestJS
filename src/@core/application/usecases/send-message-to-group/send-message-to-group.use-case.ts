@@ -36,7 +36,7 @@ export class SendMessageToGroupUseCase implements SendMessageToGroupUseCaseI {
       }
       const message = MessageEntity.create({
         content: messageContent,
-        groupId: group.id,
+        group: group,
         sender: sender,
         id: crypto.randomUUID(),
       });
@@ -48,7 +48,6 @@ export class SendMessageToGroupUseCase implements SendMessageToGroupUseCaseI {
 
       return message;
     } catch (err) {
-      console.log(err);
       if (
         err instanceof DomainError.UserIsntInGroup ||
         err instanceof DomainError.InvalidUser ||

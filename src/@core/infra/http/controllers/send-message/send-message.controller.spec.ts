@@ -3,7 +3,11 @@ import {
   SendMessageToGroupProps,
   SendMessageToGroupUseCaseI,
 } from '../../../../application/usecases/send-message-to-group';
-import { MessageEntity, UserEntity } from '../../../../domain/entities';
+import {
+  GroupEntity,
+  MessageEntity,
+  UserEntity,
+} from '../../../../domain/entities';
 import { DomainError } from '../../../../domain/errors/domain.error';
 import { SendMessageController } from './send-message.controller';
 
@@ -11,7 +15,19 @@ class SendMessageToGroupUseCaseStub implements SendMessageToGroupUseCaseI {
   async execute(props: SendMessageToGroupProps): Promise<MessageEntity> {
     return MessageEntity.create({
       content: 'any_content',
-      groupId: 'any_group_id',
+      group: GroupEntity.create({
+        id: 'any_group_id',
+        description: 'any_group_description',
+        messages: [],
+        name: 'any_group_name',
+        owner: UserEntity.create({
+          email: 'any_user_email',
+          id: 'any_user_id',
+          name: 'any_user_name',
+          password: 'any_user_password',
+        }),
+        users: [],
+      }),
       id: 'any_message_id',
       sender: UserEntity.create({
         email: 'any_user_email',
@@ -174,11 +190,6 @@ describe('SendMessage Controller', () => {
       content: 'any_content',
       groupId: 'any_group_id',
       sendDate: new Date(),
-      sender: {
-        email: 'any_user_email',
-        id: 'any_user_id',
-        name: 'any_user_name',
-      },
     });
   });
 });

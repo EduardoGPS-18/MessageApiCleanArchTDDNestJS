@@ -1,5 +1,5 @@
 import { EntitySchema } from 'typeorm';
-import { MessageEntity } from '../../../../domain/entities';
+import { GroupEntity, MessageEntity } from '../../../../domain/entities';
 import { UserSchema } from '../user';
 
 export const MessageScheme = new EntitySchema<MessageEntity>({
@@ -13,6 +13,11 @@ export const MessageScheme = new EntitySchema<MessageEntity>({
       type: 'many-to-one',
       createForeignKeyConstraints: true,
       eager: true,
+    },
+    group: {
+      target: GroupEntity.name,
+      type: 'many-to-one',
+      inverseSide: 'messages',
     },
   },
   columns: {

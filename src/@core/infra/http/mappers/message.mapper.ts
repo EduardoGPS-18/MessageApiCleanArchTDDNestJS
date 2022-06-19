@@ -1,16 +1,14 @@
 import { MessageEntity } from '../../../domain/entities';
 import { MessageDto } from '../dtos';
-import { UserMapper } from './user.mapper';
 
 export class MessageMapper {
   static toDto(message: MessageEntity): MessageDto {
-    const { id, content, createdAt, sender, groupId } = message;
+    const { id, content, createdAt, sender, group } = message;
     return {
       id: id,
       content: content,
-      groupId: groupId,
+      groupId: group.id,
       sendDate: createdAt,
-      sender: UserMapper.toLessUserData(sender),
     };
   }
 }
