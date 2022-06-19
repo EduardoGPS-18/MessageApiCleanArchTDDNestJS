@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   Post,
 } from '@nestjs/common';
-import { AddUserUseCaseI } from '../../../../application/usecases';
+import { RegisterUserUseCaseI } from '../../../../application/usecases';
 import { DomainError } from '../../../../domain/errors/domain.error';
 import { SignupUserDto } from '../../dtos';
 import { UserMapper } from '../../mappers';
@@ -14,7 +14,7 @@ import { UserMapper } from '../../mappers';
 
 @Controller('auth')
 export class SignupController {
-  constructor(private readonly addUserUseCase: AddUserUseCaseI) {}
+  constructor(private readonly addUserUseCase: RegisterUserUseCaseI) {}
 
   @Post('signup')
   async handle(@Body() signupDto: SignupUserDto) {

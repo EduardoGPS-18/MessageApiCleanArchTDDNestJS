@@ -5,24 +5,24 @@ import { DomainError } from '../../../domain/errors/domain.error';
 import { UserRepository } from '../../../domain/repositories';
 import { Hasher, SessionHandler } from '../../protocols';
 
-export type AddUserProps = {
+export type RegisterUserProps = {
   name: string;
   email: string;
   rawPassword: string;
 };
 
-export abstract class AddUserUseCaseI {
-  abstract execute(props: AddUserProps): Promise<UserEntity>;
+export abstract class RegisterUserUseCaseI {
+  abstract execute(props: RegisterUserProps): Promise<UserEntity>;
 }
 
-export class AddUserUseCase {
+export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly hasher: Hasher,
     private readonly sessionHandler: SessionHandler,
   ) {}
 
-  async execute(props: AddUserProps): Promise<UserEntity> {
+  async execute(props: RegisterUserProps): Promise<UserEntity> {
     try {
       const { name, email, rawPassword } = props;
       const userWithSameEmail = await this.userRepository.findOneByEmail(email);

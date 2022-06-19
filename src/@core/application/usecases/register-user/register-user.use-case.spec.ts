@@ -3,7 +3,7 @@ import * as crypto from 'crypto'; // (* as mod) CUIDADO AO IMPORTAR !
 import { DomainError } from '../../../domain/errors/domain.error';
 import { RepositoryError } from '../../../domain/errors/repository.error';
 
-import { AddUserUseCase } from '.';
+import { RegisterUserUseCase } from '.';
 import { UserEntity } from '../../../domain/entities/';
 import { UserRepository } from '../../../domain/repositories';
 import { Hasher, Payload, SessionHandler } from '../../protocols';
@@ -47,7 +47,7 @@ class SessionHandlerStub implements SessionHandler {
 }
 
 type SutTypes = {
-  sut: AddUserUseCase;
+  sut: RegisterUserUseCase;
   hasherStub: HasherStub;
   userRepositoryStub: UserRepositoryStub;
   sessionHandlerStub: SessionHandlerStub;
@@ -56,7 +56,7 @@ const makeSut = (): SutTypes => {
   const userRepositoryStub = new UserRepositoryStub();
   const hasherStub = new HasherStub();
   const sessionHandlerStub = new SessionHandlerStub();
-  const sut = new AddUserUseCase(
+  const sut = new RegisterUserUseCase(
     userRepositoryStub,
     hasherStub,
     sessionHandlerStub,

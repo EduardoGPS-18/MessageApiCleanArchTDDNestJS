@@ -9,10 +9,10 @@ import {
   SessionHandler,
 } from './@core/application/protocols';
 import {
-  AddUserUseCase,
-  AddUserUseCaseI,
   LoginUserUseCase,
   LoginUserUseCaseI,
+  RegisterUserUseCase,
+  RegisterUserUseCaseI,
 } from './@core/application/usecases';
 import {
   CreateGroupUseCase,
@@ -125,13 +125,13 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
     },
     //USE CASES
     {
-      provide: AddUserUseCaseI,
+      provide: RegisterUserUseCaseI,
       useFactory: (
         userRepository: UserRepository,
         hasher: Hasher,
         sessionHandler: SessionHandler,
       ) => {
-        return new AddUserUseCase(userRepository, hasher, sessionHandler);
+        return new RegisterUserUseCase(userRepository, hasher, sessionHandler);
       },
       inject: [UserRepository, Hasher, SessionHandler],
     },
