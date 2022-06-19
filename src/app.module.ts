@@ -19,6 +19,10 @@ import {
   CreateGroupUseCaseI,
 } from './@core/application/usecases/create-group';
 import {
+  GetGroupMessageListUseCase,
+  GetGroupMessageListUseCaseI,
+} from './@core/application/usecases/get-group-messages';
+import {
   SendMessageToGroupUseCase,
   SendMessageToGroupUseCaseI,
 } from './@core/application/usecases/send-message-to-group';
@@ -40,6 +44,7 @@ import { GroupSchema } from './@core/infra/db/typeorm/group';
 import { MessageScheme } from './@core/infra/db/typeorm/message';
 import { UserSchema } from './@core/infra/db/typeorm/user';
 import { CreateGroupController } from './@core/infra/http/controllers/add-group';
+import { GetGroupMessageListController } from './@core/infra/http/controllers/get-group-messages';
 import { LoginController } from './@core/infra/http/controllers/login';
 import { SendMessageController } from './@core/infra/http/controllers/send-message';
 import { SignupController } from './@core/infra/http/controllers/signup';
@@ -157,6 +162,21 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       inject: [GroupRepository, UserRepository, MessageRepository],
     },
     {
+      provide: GetGroupMessageListUseCaseI,
+      useFactory: (
+        groupRepository: GroupRepository,
+        messageRepository: MessageRepository,
+        userRepository: UserRepository,
+      ) => {
+        return new GetGroupMessageListUseCase(
+          groupRepository,
+          messageRepository,
+          userRepository,
+        );
+      },
+      inject: [GroupRepository, MessageRepository, UserRepository],
+    },
+    {
       provide: ValidateUserUseCaseI,
       useFactory: (
         sessionHandler: SessionHandler,
@@ -185,6 +205,7 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
     LoginController,
     SignupController,
     CreateGroupController,
+    GetGroupMessageListController,
     SendMessageController,
   ],
 })

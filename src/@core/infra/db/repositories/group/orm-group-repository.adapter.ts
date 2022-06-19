@@ -17,7 +17,6 @@ export class OrmGroupRepositoryAdapter implements GroupRepository {
     try {
       return await this.ormGroupRepository.findOneBy({ id });
     } catch (err) {
-      console.log(err);
       throw new RepositoryError.OperationError();
     }
   }

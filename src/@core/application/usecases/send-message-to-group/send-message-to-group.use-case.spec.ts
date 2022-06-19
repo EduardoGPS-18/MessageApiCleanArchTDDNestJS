@@ -49,7 +49,7 @@ class MessageRepositoryStub implements MessageRepository {
   insert(message: MessageEntity): Promise<void> {
     return;
   }
-  findByGroup(groupId: string): Promise<MessageEntity[]> {
+  findByGroup(group: GroupEntity): Promise<MessageEntity[]> {
     return;
   }
 }

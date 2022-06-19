@@ -11,6 +11,8 @@ import {
 import { DomainError } from '../../../../domain/errors/domain.error';
 import { SendMessageController } from './send-message.controller';
 
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
 class SendMessageToGroupUseCaseStub implements SendMessageToGroupUseCaseI {
   async execute(props: SendMessageToGroupProps): Promise<MessageEntity> {
     return MessageEntity.create({

@@ -1,6 +1,9 @@
 import { EntitySchema } from 'typeorm';
-import { GroupEntity, MessageEntity } from '../../../../domain/entities';
-import { UserSchema } from '../user';
+import {
+  GroupEntity,
+  MessageEntity,
+  UserEntity,
+} from '../../../../domain/entities';
 
 export const MessageScheme = new EntitySchema<MessageEntity>({
   name: MessageEntity.name,
@@ -9,8 +12,9 @@ export const MessageScheme = new EntitySchema<MessageEntity>({
   synchronize: true,
   relations: {
     sender: {
-      target: UserSchema,
+      target: UserEntity.name,
       type: 'many-to-one',
+
       createForeignKeyConstraints: true,
       eager: true,
     },

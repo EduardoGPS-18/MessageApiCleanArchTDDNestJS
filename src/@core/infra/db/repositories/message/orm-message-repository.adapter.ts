@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { MessageEntity } from '../../../../domain/entities';
+import { GroupEntity, MessageEntity } from '../../../../domain/entities';
 import { RepositoryError } from '../../../../domain/errors/repository.error';
 import { MessageRepository } from '../../../../domain/repositories';
 
@@ -16,9 +16,12 @@ export class OrmMessageRepositoryAdapter implements MessageRepository {
     }
   }
 
-  async findByGroup(groupId: string): Promise<MessageEntity[]> {
+  async findByGroup(group: GroupEntity): Promise<MessageEntity[]> {
     try {
-      return await this.ormMessageRepository.findBy({ groupId: groupId });
+      return await this.ormMessageRepository
+        .createQueryBuilder('message')
+        .andWhere('message.groupId = :groupId', { groupId: group.id })
+        .getMany();
     } catch (err) {
       throw new RepositoryError.OperationError();
     }
