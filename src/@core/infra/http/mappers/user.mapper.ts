@@ -1,4 +1,4 @@
-import { UserEntity } from '../../../domain/entities';
+import { UserEntity } from '../../../domain/entities/';
 import { AuthenticatedUserDto } from '../dtos/authenticated-user.dto';
 import { LessUserDataDto } from '../dtos/less-user-data.dto';
 

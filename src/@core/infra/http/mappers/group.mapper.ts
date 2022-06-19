@@ -1,5 +1,6 @@
 import { GroupEntity } from '../../../domain/entities/group';
 import { GroupDto } from '../dtos';
+import { MessageMapper } from './message.mapper';
 import { UserMapper } from './user.mapper';
 
 export class GroupMapper {
@@ -10,6 +11,7 @@ export class GroupMapper {
       description: group.description,
       owner: UserMapper.toLessUserData(group.owner),
       users: group.users.map((user) => UserMapper.toLessUserData(user)),
+      messages: group.messages.map((message) => MessageMapper.toDto(message)),
     };
   }
 }

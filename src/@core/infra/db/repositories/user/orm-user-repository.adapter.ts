@@ -1,5 +1,5 @@
 import { In, Repository } from 'typeorm';
-import { UserEntity } from '../../../../../@core/domain/entities';
+import { UserEntity } from '../../../../../@core/domain/entities/';
 import { UserRepository } from '../../../../../@core/domain/repositories';
 import { RepositoryError } from '../../../../domain/errors/repository.error';
 

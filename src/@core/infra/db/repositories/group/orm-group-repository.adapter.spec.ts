@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { UserEntity } from '../../../../domain/entities';
+import { UserEntity } from '../../../../domain/entities/';
 import { GroupEntity } from '../../../../domain/entities/group';
 import { RepositoryError } from '../../../../domain/errors/repository.error';
 import { GroupSchema } from '../../typeorm/group';
@@ -33,6 +33,7 @@ describe('OrmGroup Repository Adapter', () => {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_user_id',
         email: 'any_user_email',
@@ -55,6 +56,7 @@ describe('OrmGroup Repository Adapter', () => {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_user_id',
         email: 'any_user_email',

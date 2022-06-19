@@ -1,4 +1,5 @@
 import { DateMetadataProps } from '../helpers';
+import { MessageEntity } from '../message';
 import { UserEntity } from '../user';
 
 export type CreateGroupProps = {
@@ -7,6 +8,7 @@ export type CreateGroupProps = {
   description: string;
   owner: UserEntity;
   users: UserEntity[];
+  messages: MessageEntity[];
 };
 
 export class GroupEntity {
@@ -15,6 +17,7 @@ export class GroupEntity {
   description: string;
   owner: UserEntity;
   users: UserEntity[];
+  messages: MessageEntity[];
   createdAt: Date;
   updatedAt: Date;
 
@@ -26,13 +29,14 @@ export class GroupEntity {
       // Used by orm's
       return;
     }
-    const { id, name, description, owner, users } = createGroupProps;
+    const { id, name, description, owner, users, messages } = createGroupProps;
     const { createdAt, updatedAt } = dateMetadata;
     this.id = id;
     this.name = name;
     this.description = description;
     this.owner = owner;
-    this.users = users;
+    this.users = [...users];
+    this.messages = [...messages];
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

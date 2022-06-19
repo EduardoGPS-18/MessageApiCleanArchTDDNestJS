@@ -89,6 +89,7 @@ describe('CreateGroup Use Case', () => {
       id: 'gen_uuid',
       name: 'any_group_name',
       description: 'any_group_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_owner_id',
         name: 'any_owner_name',
@@ -199,6 +200,7 @@ describe('CreateGroup Use Case', () => {
       id: 'gen_uuid',
       name: 'any_group_name',
       description: 'any_group_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_owner_id',
         name: 'any_owner_name',

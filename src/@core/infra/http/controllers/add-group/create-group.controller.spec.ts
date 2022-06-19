@@ -6,7 +6,7 @@ import {
   CreateGroupUseCaseI,
   CreateGroupUseCaseProps,
 } from '../../../../application/usecases/create-group';
-import { UserEntity } from '../../../../domain/entities';
+import { UserEntity } from '../../../../domain/entities/';
 import { GroupEntity } from '../../../../domain/entities/group';
 import { DomainError } from '../../../../domain/errors/domain.error';
 import { CreateGroupController } from './create-group.controller';
@@ -19,6 +19,7 @@ class CreateGroupUseCaseStub implements CreateGroupUseCaseI {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_id',
         email: 'any_email',
@@ -134,6 +135,7 @@ describe('CreateGroup Controller', () => {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: {
         id: 'any_id',
         email: 'any_email',

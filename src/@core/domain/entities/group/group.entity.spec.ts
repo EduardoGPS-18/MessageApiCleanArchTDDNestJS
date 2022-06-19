@@ -9,6 +9,7 @@ describe('Group entity', () => {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_user_id',
         email: 'any_user_email',
@@ -40,6 +41,7 @@ describe('Group entity', () => {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_user_id',
         email: 'any_user_email',
@@ -74,6 +76,7 @@ describe('Group entity', () => {
       id: 'any_id',
       name: 'any_name',
       description: 'any_description',
+      messages: [],
       owner: UserEntity.create({
         id: 'any_user_id',
         email: 'any_user_email',

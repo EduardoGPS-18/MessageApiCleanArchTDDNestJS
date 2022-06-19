@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateGroupUseCaseI } from '../../../../application/usecases/create-group';
-import { UserEntity } from '../../../../domain/entities';
+import { UserEntity } from '../../../../domain/entities/';
 import { DomainError } from '../../../../domain/errors/domain.error';
 import { CreateGroupDto, GroupDto } from '../../dtos';
 import { GetUserEntity } from '../../helpers/decorators';

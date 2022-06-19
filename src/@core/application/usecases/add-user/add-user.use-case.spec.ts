@@ -4,7 +4,7 @@ import { DomainError } from '../../../domain/errors/domain.error';
 import { RepositoryError } from '../../../domain/errors/repository.error';
 
 import { AddUserUseCase } from '.';
-import { UserEntity } from '../../../domain/entities';
+import { UserEntity } from '../../../domain/entities/';
 import { UserRepository } from '../../../domain/repositories';
 import { Hasher, Payload, SessionHandler } from '../../protocols';
 

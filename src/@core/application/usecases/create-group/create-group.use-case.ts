@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { MessageEntity } from 'src/@core/domain/entities';
 import { GroupEntity } from '../../../domain/entities/group';
 import { DomainError } from '../../../domain/errors/domain.error';
 import { GroupRepository, UserRepository } from '../../../domain/repositories';
@@ -33,12 +34,14 @@ export class CreateGroupUseCase implements CreateGroupUseCaseI {
         throw new DomainError.MissingGroupOwner();
       }
       const users = await this.userRepository.findUserListByIdList(usersIds);
+      const messages: MessageEntity[] = [];
       const group = GroupEntity.create({
         id,
         name,
         description,
         owner,
         users,
+        messages,
       });
       await this.groupRepository.insert(group);
 
