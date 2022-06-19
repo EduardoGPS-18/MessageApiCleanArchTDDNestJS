@@ -1,8 +1,9 @@
 import * as crypto from 'crypto';
 import { DataSource, In, Repository } from 'typeorm';
 import { UserEntity } from '../../../../domain/entities';
+import { RepositoryError } from '../../../../domain/errors/repository.error';
 import { UserSchema } from '../../typeorm/user';
-import { OrmUserRepositoryAdapter } from './orm-user.adapter';
+import { OrmUserRepositoryAdapter } from './orm-user-repository.adapter';
 
 type SutTypes = {
   ormUserRepository: Repository<UserEntity>;
@@ -54,6 +55,18 @@ describe('Orm User Repository adapter', () => {
       });
     });
 
+    it('Should throw RepositoryError.OperationError if OrmRepository throws', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockRejectedValueOnce(new Error());
+
+      const promise = sut.findOneByEmail('any_email');
+      await expect(promise).rejects.toThrowError(
+        RepositoryError.OperationError,
+      );
+    });
+
     it('Should return same of orm', async () => {
       const { sut, ormUserRepository } = await makeSut();
 
@@ -77,6 +90,18 @@ describe('Orm User Repository adapter', () => {
       expect(ormUserRepository.findOneBy).toHaveBeenCalledWith({
         id: 'any_id',
       });
+    });
+
+    it('Should throw RepositoryError.OperationError if OrmRepository throws', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      jest
+        .spyOn(ormUserRepository, 'findOneBy')
+        .mockRejectedValueOnce(new Error());
+
+      const promise = sut.findOneById('any_email');
+      await expect(promise).rejects.toThrowError(
+        RepositoryError.OperationError,
+      );
     });
 
     it('Should return same of orm', async () => {
@@ -104,6 +129,19 @@ describe('Orm User Repository adapter', () => {
       });
     });
 
+    it('Should throw RepositoryError.OperationError if OrmRepository throws', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      jest
+        .spyOn(ormUserRepository, 'findBy')
+        .mockRejectedValueOnce(new Error());
+      const uuidUser1 = crypto.randomUUID();
+      const uuidUser2 = crypto.randomUUID();
+      const promise = sut.findUserListByIdList([uuidUser1, uuidUser2]);
+      await expect(promise).rejects.toThrowError(
+        RepositoryError.OperationError,
+      );
+    });
+
     it('Should return same of orm', async () => {
       const { sut, ormUserRepository } = await makeSut();
 
@@ -124,6 +162,15 @@ describe('Orm User Repository adapter', () => {
       expect(ormUserRepository.save).toHaveBeenCalledWith(mockedUser);
       expect(result).toBeUndefined();
     });
+
+    it('Should throw RepositoryError.OperationError if OrmRepository throws', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      jest.spyOn(ormUserRepository, 'save').mockRejectedValueOnce(new Error());
+      const promise = sut.insert(mockedUser);
+      await expect(promise).rejects.toThrowError(
+        RepositoryError.OperationError,
+      );
+    });
   });
 
   describe('Update', () => {
@@ -133,6 +180,15 @@ describe('Orm User Repository adapter', () => {
       const result = await sut.update(mockedUser);
       expect(ormUserRepository.save).toHaveBeenCalledWith(mockedUser);
       expect(result).toBeUndefined();
+    });
+
+    it('Should throw RepositoryError.OperationError if OrmRepository throws', async () => {
+      const { sut, ormUserRepository } = await makeSut();
+      jest.spyOn(ormUserRepository, 'save').mockRejectedValueOnce(new Error());
+      const promise = sut.update(mockedUser);
+      await expect(promise).rejects.toThrowError(
+        RepositoryError.OperationError,
+      );
     });
   });
 });

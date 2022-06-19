@@ -10,6 +10,8 @@ import {
 import { UserEntity } from '../../../../domain/entities';
 import { DomainError } from '../../../../domain/errors/domain.error';
 
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
 class AddUserUsecaseStub implements AddUserUseCaseI {
   async execute(props: AddUserProps): Promise<UserEntity> {
     return {

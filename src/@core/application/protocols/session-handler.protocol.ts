@@ -5,4 +5,5 @@ export type Payload = {
 
 export abstract class SessionHandler {
   abstract generateSession(payload: Payload): string;
+  abstract verifySession(session: string): Payload;
 }

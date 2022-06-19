@@ -10,7 +10,13 @@ export type CreateGroupUseCaseProps = {
   usersIds: string[];
 };
 
-export class CreateGroupUseCase {
+export abstract class CreateGroupUseCaseI {
+  abstract execute(
+    createGroupUsecaseProps: CreateGroupUseCaseProps,
+  ): Promise<GroupEntity>;
+}
+
+export class CreateGroupUseCase implements CreateGroupUseCaseI {
   constructor(
     private readonly groupRepository: GroupRepository,
     private readonly userRepository: UserRepository,

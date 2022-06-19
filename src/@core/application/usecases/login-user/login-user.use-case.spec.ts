@@ -44,6 +44,9 @@ class EncrypterStub implements Encrypter {
 }
 
 class SessionHandlerStub implements SessionHandler {
+  verifySession(session: string): Payload {
+    return;
+  }
   generateSession(payload: Payload): string {
     return 'generated_session';
   }

@@ -38,6 +38,9 @@ class HasherStub implements Hasher {
 }
 
 class SessionHandlerStub implements SessionHandler {
+  verifySession(session: string): Payload {
+    return;
+  }
   generateSession(payload: Payload): string {
     return 'generated_session';
   }

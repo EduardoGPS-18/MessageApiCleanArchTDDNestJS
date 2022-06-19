@@ -2,29 +2,29 @@ import { EntitySchema } from 'typeorm';
 import { GroupEntity } from '../../../../domain/entities/group';
 import { UserSchema } from '../user';
 
-export const GroupScheme = new EntitySchema<GroupEntity>({
+export const GroupSchema = new EntitySchema<GroupEntity>({
   name: GroupEntity.name,
   tableName: 'group',
   target: GroupEntity,
   synchronize: true,
   relations: {
-    // users: {
-    //   target: UserSchema,
-    //   eager: true,
-    //   nullable: false,
-    //   type: 'many-to-many',
-    //   joinTable: {
-    //     name: 'users-group',
-    //     joinColumn: {
-    //       name: 'group_id',
-    //       referencedColumnName: 'id',
-    //     },
-    //     inverseJoinColumn: {
-    //       name: 'user_id',
-    //       referencedColumnName: 'id',
-    //     },
-    //   },
-    // },
+    users: {
+      target: UserSchema,
+      eager: true,
+      nullable: false,
+      type: 'many-to-many',
+      joinTable: {
+        name: 'users-group',
+        joinColumn: {
+          name: 'group_id',
+          referencedColumnName: 'id',
+        },
+        inverseJoinColumn: {
+          name: 'user_id',
+          referencedColumnName: 'id',
+        },
+      },
+    },
     owner: {
       target: UserSchema,
       type: 'many-to-one',
