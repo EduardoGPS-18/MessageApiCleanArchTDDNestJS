@@ -4,16 +4,16 @@ import {
 } from '@nestjs/common';
 import { SignupController } from '.';
 import {
-  AddUserProps,
-  AddUserUseCaseI,
+  RegisterUserProps,
+  RegisterUserUseCaseI,
 } from '../../../../application/usecases';
 import { UserEntity } from '../../../../domain/entities';
 import { DomainError } from '../../../../domain/errors/domain.error';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-class AddUserUsecaseStub implements AddUserUseCaseI {
-  async execute(props: AddUserProps): Promise<UserEntity> {
+class RegisterUserUsecaseStub implements RegisterUserUseCaseI {
+  async execute(props: RegisterUserProps): Promise<UserEntity> {
     return {
       id: 'any_id',
       name: 'any_name',
@@ -28,19 +28,19 @@ class AddUserUsecaseStub implements AddUserUseCaseI {
 }
 type SutTypes = {
   sut: SignupController;
-  addUserUsecaseStub: AddUserUsecaseStub;
+  registerUserUsecaseStub: RegisterUserUsecaseStub;
 };
 
 const makeSut = (): SutTypes => {
-  const addUserUsecaseStub = new AddUserUsecaseStub();
-  const sut = new SignupController(addUserUsecaseStub);
-  return { sut, addUserUsecaseStub };
+  const registerUserUsecaseStub = new RegisterUserUsecaseStub();
+  const sut = new SignupController(registerUserUsecaseStub);
+  return { sut, registerUserUsecaseStub };
 };
 
 describe('Signup Controller', () => {
   it('Should call usecase correctly', async () => {
-    const { sut, addUserUsecaseStub } = makeSut();
-    jest.spyOn(addUserUsecaseStub, 'execute');
+    const { sut, registerUserUsecaseStub } = makeSut();
+    jest.spyOn(registerUserUsecaseStub, 'execute');
 
     await sut.handle({
       email: 'any_email',
@@ -48,7 +48,7 @@ describe('Signup Controller', () => {
       password: 'any_password',
     });
 
-    expect(addUserUsecaseStub.execute).toHaveBeenCalledWith({
+    expect(registerUserUsecaseStub.execute).toHaveBeenCalledWith({
       email: 'any_email',
       name: 'any_name',
       rawPassword: 'any_password',
@@ -56,9 +56,9 @@ describe('Signup Controller', () => {
   });
 
   it('Should throw BadRequest on CredentialsAlreadyInUser', async () => {
-    const { sut, addUserUsecaseStub } = makeSut();
+    const { sut, registerUserUsecaseStub } = makeSut();
     jest
-      .spyOn(addUserUsecaseStub, 'execute')
+      .spyOn(registerUserUsecaseStub, 'execute')
       .mockRejectedValueOnce(new DomainError.CredentialsAlreadyInUse());
 
     const promise = sut.handle({
@@ -71,9 +71,9 @@ describe('Signup Controller', () => {
   });
 
   it('Should throw InternalServerError on UnexpectedError', async () => {
-    const { sut, addUserUsecaseStub } = makeSut();
+    const { sut, registerUserUsecaseStub } = makeSut();
     jest
-      .spyOn(addUserUsecaseStub, 'execute')
+      .spyOn(registerUserUsecaseStub, 'execute')
       .mockRejectedValueOnce(new DomainError.Unexpected());
 
     const promise = sut.handle({

@@ -1,3 +1,4 @@
+export * from './add-user-to-group';
 export * from './create-group';
 export * from './get-group-messages';
 export * from './login-user';
