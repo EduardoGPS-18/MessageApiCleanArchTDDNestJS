@@ -9,6 +9,8 @@ import {
   SessionHandler,
 } from './@core/application/protocols';
 import {
+  AddUserToGroupUseCase,
+  AddUserToGroupUseCaseI,
   LoginUserUseCase,
   LoginUserUseCaseI,
   RegisterUserUseCase,
@@ -44,6 +46,7 @@ import { GroupSchema } from './@core/infra/db/typeorm/group';
 import { MessageScheme } from './@core/infra/db/typeorm/message';
 import { UserSchema } from './@core/infra/db/typeorm/user';
 import { CreateGroupController } from './@core/infra/http/controllers/add-group';
+import { AddUserToGroupController } from './@core/infra/http/controllers/add-user-to-group';
 import { GetGroupMessageListController } from './@core/infra/http/controllers/get-group-messages';
 import { LoginController } from './@core/infra/http/controllers/login';
 import { SendMessageController } from './@core/infra/http/controllers/send-message';
@@ -124,6 +127,7 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       inject: [getDataSourceToken()],
     },
     //USE CASES
+
     {
       provide: RegisterUserUseCaseI,
       useFactory: (
@@ -145,6 +149,30 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
         return new LoginUserUseCase(encrypter, userRepository, sessionHandler);
       },
       inject: [UserRepository, Encrypter, SessionHandler],
+    },
+    {
+      provide: ValidateUserUseCaseI,
+      useFactory: (
+        sessionHandler: SessionHandler,
+        userRepository: UserRepository,
+      ) => new ValidateUserUseCase(sessionHandler, userRepository),
+      inject: [SessionHandler, UserRepository],
+    },
+    {
+      provide: JwtAuthGuard,
+      useFactory: (validateUserUseCase: ValidateUserUseCaseI) =>
+        new JwtAuthGuard(validateUserUseCase),
+      inject: [ValidateUserUseCaseI],
+    },
+    {
+      provide: CreateGroupUseCaseI,
+      useFactory: (
+        groupRepository: GroupRepository,
+        userRepository: UserRepository,
+      ) => {
+        return new CreateGroupUseCase(groupRepository, userRepository);
+      },
+      inject: [GroupRepository, UserRepository],
     },
     {
       provide: SendMessageToGroupUseCaseI,
@@ -177,28 +205,14 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       inject: [GroupRepository, MessageRepository, UserRepository],
     },
     {
-      provide: ValidateUserUseCaseI,
+      provide: AddUserToGroupUseCaseI,
       useFactory: (
-        sessionHandler: SessionHandler,
         userRepository: UserRepository,
-      ) => new ValidateUserUseCase(sessionHandler, userRepository),
-      inject: [SessionHandler, UserRepository],
-    },
-    {
-      provide: CreateGroupUseCaseI,
-      useFactory: (
         groupRepository: GroupRepository,
-        userRepository: UserRepository,
       ) => {
-        return new CreateGroupUseCase(groupRepository, userRepository);
+        return new AddUserToGroupUseCase(groupRepository, userRepository);
       },
-      inject: [GroupRepository, UserRepository],
-    },
-    {
-      provide: JwtAuthGuard,
-      useFactory: (validateUserUseCase: ValidateUserUseCaseI) =>
-        new JwtAuthGuard(validateUserUseCase),
-      inject: [ValidateUserUseCaseI],
+      inject: [UserRepository, GroupRepository],
     },
   ],
   controllers: [
@@ -207,6 +221,7 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
     CreateGroupController,
     GetGroupMessageListController,
     SendMessageController,
+    AddUserToGroupController,
   ],
 })
 export class AppModule {}

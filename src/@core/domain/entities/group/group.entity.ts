@@ -46,6 +46,10 @@ export class GroupEntity {
     return this.users.map((user) => user.id).includes(user.id);
   }
 
+  isUserAdminer(user: UserEntity): boolean {
+    return user.id === this.owner.id;
+  }
+
   addUserListOnGroup(users: UserEntity[]) {
     users.map((user) => {
       if (!this.users.includes(user)) {

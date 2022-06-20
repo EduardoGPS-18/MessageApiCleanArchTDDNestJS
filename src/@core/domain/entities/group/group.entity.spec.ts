@@ -179,4 +179,54 @@ describe('Group entity', () => {
       expect(group.isUserInGroup(user1)).toBe(true);
     });
   });
+
+  describe('is user group adminer', () => {
+    it('Should return true if user is owner', () => {
+      const owner = UserEntity.create({
+        id: 'any_owner_id',
+        email: 'any_owner_email',
+        name: 'any_owner_name',
+        password: 'any_owner_password',
+        session: 'any_owner_session',
+      });
+
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: owner,
+        users: [],
+      });
+
+      expect(group.isUserAdminer(owner)).toBe(true);
+    });
+
+    it('Should return false if user isnt owner', () => {
+      const owner = UserEntity.create({
+        id: 'any_owner_id',
+        email: 'any_owner_email',
+        name: 'any_owner_name',
+        password: 'any_owner_password',
+        session: 'any_owner_session',
+      });
+      const anyUser = UserEntity.create({
+        id: 'any_user_id',
+        email: 'any_user_email',
+        name: 'any_user_name',
+        password: 'any_user_password',
+        session: 'any_user_session',
+      });
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: owner,
+        users: [],
+      });
+
+      expect(group.isUserInGroup(anyUser)).toBe(false);
+    });
+  });
 });

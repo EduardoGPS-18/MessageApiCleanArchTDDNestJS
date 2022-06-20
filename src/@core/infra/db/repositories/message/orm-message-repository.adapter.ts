@@ -24,7 +24,6 @@ export class OrmMessageRepositoryAdapter implements MessageRepository {
         .leftJoinAndSelect('message.sender', 'user')
         .getMany();
     } catch (err) {
-      console.log(err);
       throw new RepositoryError.OperationError();
     }
   }
