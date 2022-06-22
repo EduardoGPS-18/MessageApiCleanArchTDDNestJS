@@ -1,6 +1,5 @@
-import { DateMetadataProps } from '../helpers';
-import { MessageEntity } from '../message';
-import { UserEntity } from '../user';
+import { MessageEntity, UserEntity } from '@domain/entities/';
+import { DateMetadataProps } from '@domain/helpers';
 
 export type CreateGroupProps = {
   id: string;

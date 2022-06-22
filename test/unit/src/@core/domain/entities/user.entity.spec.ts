@@ -1,4 +1,4 @@
-import { UserEntity } from './user.entity';
+import { UserEntity } from '@domain/entities';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 

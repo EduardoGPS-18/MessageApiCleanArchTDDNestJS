@@ -1,3 +1,3 @@
-export * from './group';
-export * from './message';
-export * from './user';
+export * from './group.entity';
+export * from './message.entity';
+export * from './user.entity';

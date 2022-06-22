@@ -1,6 +1,6 @@
-import { GroupEntity, UserEntity } from '..';
-import { DomainError } from '../../errors/domain.error';
-import { DateMetadataProps } from '../helpers';
+import { GroupEntity, UserEntity } from '@domain/entities/';
+import { DomainError } from '@domain/errors';
+import { DateMetadataProps } from '@domain/helpers/';
 
 export type CreateMessageProps = {
   id: string;

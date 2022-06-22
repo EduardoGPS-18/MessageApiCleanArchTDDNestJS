@@ -1,4 +1,4 @@
-import { GroupEntity } from '../entities/group';
+import { GroupEntity } from '@domain/entities';
 
 export abstract class GroupRepository {
   abstract insert(group: GroupEntity): Promise<void>;

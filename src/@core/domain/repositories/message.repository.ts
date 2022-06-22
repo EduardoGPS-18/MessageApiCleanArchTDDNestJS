@@ -1,4 +1,4 @@
-import { GroupEntity, MessageEntity } from '../entities';
+import { GroupEntity, MessageEntity } from '@domain/entities';
 
 export abstract class MessageRepository {
   abstract insert(message: MessageEntity): Promise<void>;

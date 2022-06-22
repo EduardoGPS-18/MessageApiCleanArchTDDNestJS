@@ -1,7 +1,5 @@
-import { DomainError } from '../../errors/domain.error';
-import { GroupEntity } from '../group';
-import { MessageEntity } from '../message';
-import { UserEntity } from '../user';
+import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
