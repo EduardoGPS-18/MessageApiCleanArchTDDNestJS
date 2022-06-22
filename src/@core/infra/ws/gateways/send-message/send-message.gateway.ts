@@ -16,8 +16,8 @@ import { Server, Socket } from 'socket.io';
 import { SendMessageToGroupUseCaseI } from '../../../../application/usecases/send-message-to-group';
 import { UserEntity } from '../../../../domain/entities';
 import { DomainError } from '../../../../domain/errors/domain.error';
-import { SendMessageDto } from '../../../../infra/http/dtos';
 import { MessageMapper } from '../../../../infra/http/mappers/message.mapper';
+import { SendMessageDto } from '../../dtos';
 import { GetWSUserEntity } from '../helpers/decorators';
 import { JwtWsAuthGuard } from '../helpers/guard';
 
@@ -62,15 +62,16 @@ export class SendMessageGateway
 
       return MessageMapper.toDto(message);
     } catch (err) {
-      client.emit('error', { error: err });
       if (
         err instanceof DomainError.UserIsntInGroup ||
         err instanceof DomainError.InvalidUser ||
         err instanceof DomainError.InvalidGroup ||
         err instanceof DomainError.InvalidMessage
       ) {
+        client.emit('error', { error: 'Invalid sended arguments' });
         throw new BadRequestException();
       }
+      client.emit('error', { error: 'Server error' });
       throw new InternalServerErrorException();
     }
   }

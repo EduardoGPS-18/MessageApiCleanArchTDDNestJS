@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io-client';
 import {
   SendMessageToGroupProps,
   SendMessageToGroupUseCaseI,
@@ -10,6 +11,8 @@ import {
 import { SendMessageGateway } from './send-message.gateway';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
+const socket: Socket = jest.genMockFromModule('socket.io-client');
 
 let client = {
   request: {
@@ -59,149 +62,152 @@ const makeSut = (): SutTypes => {
   return { sut, sendMessageToGroupUseCaseStub };
 };
 describe('SendMessage Controller', () => {
+  beforeEach(() => {
+    socket.emit = jest.fn();
+  });
   it('Fix those tests (WebSocket)', () => expect(1).toBe(1));
-  // it('Should call dependencies correctly', async () => {
-  //   const { sut, sendMessageToGroupUseCaseStub } = makeSut();
-  //   jest.spyOn(sendMessageToGroupUseCaseStub, 'execute');
-  //   await sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   expect(sendMessageToGroupUseCaseStub.execute).toHaveBeenCalledWith({
-  //     messageContent: 'any_content',
-  //     groupId: 'any_group_id',
-  //     senderId: 'any_user_id',
-  //   });
-  // });
-  // it('Should throw BadRequest on DomainError.UserIsntInGroup', async () => {
-  //   const { sut, sendMessageToGroupUseCaseStub } = makeSut();
-  //   jest
-  //     .spyOn(sendMessageToGroupUseCaseStub, 'execute')
-  //     .mockRejectedValueOnce(new DomainError.UserIsntInGroup());
-  //   const promise = sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   await expect(promise).rejects.toThrowError(BadRequestException);
-  // });
-  // it('Should throw BadRequest on DomainError.InvalidUser', async () => {
-  //   const { sut, sendMessageToGroupUseCaseStub } = makeSut();
-  //   jest
-  //     .spyOn(sendMessageToGroupUseCaseStub, 'execute')
-  //     .mockRejectedValueOnce(new DomainError.InvalidUser());
-  //   const promise = sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   await expect(promise).rejects.toThrowError(BadRequestException);
-  // });
-  // it('Should throw BadRequest on DomainError.InvalidGroup', async () => {
-  //   const { sut, sendMessageToGroupUseCaseStub } = makeSut();
-  //   jest
-  //     .spyOn(sendMessageToGroupUseCaseStub, 'execute')
-  //     .mockRejectedValueOnce(new DomainError.InvalidGroup());
-  //   const promise = sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   await expect(promise).rejects.toThrowError(BadRequestException);
-  // });
-  // it('Should throw BadRequest on DomainError.InvalidMessage', async () => {
-  //   const { sut, sendMessageToGroupUseCaseStub } = makeSut();
-  //   jest
-  //     .spyOn(sendMessageToGroupUseCaseStub, 'execute')
-  //     .mockRejectedValueOnce(new DomainError.InvalidMessage());
-  //   const promise = sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   await expect(promise).rejects.toThrowError(BadRequestException);
-  // });
-  // it('Should throw ServerError on another error', async () => {
-  //   const { sut, sendMessageToGroupUseCaseStub } = makeSut();
-  //   jest
-  //     .spyOn(sendMessageToGroupUseCaseStub, 'execute')
-  //     .mockRejectedValueOnce(new DomainError.UserIsntInGroup());
-  //   const promise = sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   await expect(promise).rejects.toThrowError(BadRequestException);
-  // });
-  // it('Should return message on success', async () => {
-  //   const { sut } = makeSut();
-  //   const message = await sut.handle(
-  //     UserEntity.create({
-  //       email: 'any_user_email',
-  //       id: 'any_user_id',
-  //       name: 'any_user_name',
-  //       password: 'any_user_password',
-  //     }),
-  //     {
-  //       messageContent: 'any_content',
-  //       groupId: 'any_group_id',
-  //     },
-  //     client,
-  //   );
-  //   expect(message).toEqual({
-  //     id: 'any_message_id',
-  //     content: 'any_content',
-  //     groupId: 'any_group_id',
-  //     sendDate: new Date(),
-  //   });
-  // });
+  ///////  it('Should call dependencies correctly', async () => {
+  ///////    const { sut, sendMessageToGroupUseCaseStub } = makeSut();
+  ///////    jest.spyOn(sendMessageToGroupUseCaseStub, 'execute');
+  ///////    await sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      socket as any,
+  ///////    );
+  ///////    expect(sendMessageToGroupUseCaseStub.execute).toHaveBeenCalledWith({
+  ///////      messageContent: 'any_content',
+  ///////      groupId: 'any_group_id',
+  ///////      senderId: 'any_user_id',
+  ///////    });
+  ///////  });
+  ///////  it('Should throw BadRequest on DomainError.UserIsntInGroup', async () => {
+  ///////    const { sut, sendMessageToGroupUseCaseStub } = makeSut();
+  ///////    jest
+  ///////      .spyOn(sendMessageToGroupUseCaseStub, 'execute')
+  ///////      .mockRejectedValueOnce(new DomainError.UserIsntInGroup());
+  ///////    const promise = sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      client as any,
+  ///////    );
+  ///////    await expect(promise).rejects.toThrowError(BadRequestException);
+  ///////  });
+  ///////  it('Should throw BadRequest on DomainError.InvalidUser', async () => {
+  ///////    const { sut, sendMessageToGroupUseCaseStub } = makeSut();
+  ///////    jest
+  ///////      .spyOn(sendMessageToGroupUseCaseStub, 'execute')
+  ///////      .mockRejectedValueOnce(new DomainError.InvalidUser());
+  ///////    const promise = sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      client as any,
+  ///////    );
+  ///////    await expect(promise).rejects.toThrowError(BadRequestException);
+  ///////  });
+  ///////  it('Should throw BadRequest on DomainError.InvalidGroup', async () => {
+  ///////    const { sut, sendMessageToGroupUseCaseStub } = makeSut();
+  ///////    jest
+  ///////      .spyOn(sendMessageToGroupUseCaseStub, 'execute')
+  ///////      .mockRejectedValueOnce(new DomainError.InvalidGroup());
+  ///////    const promise = sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      client as any,
+  ///////    );
+  ///////    await expect(promise).rejects.toThrowError(BadRequestException);
+  ///////  });
+  ///////  it('Should throw BadRequest on DomainError.InvalidMessage', async () => {
+  ///////    const { sut, sendMessageToGroupUseCaseStub } = makeSut();
+  ///////    jest
+  ///////      .spyOn(sendMessageToGroupUseCaseStub, 'execute')
+  ///////      .mockRejectedValueOnce(new DomainError.InvalidMessage());
+  ///////    const promise = sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      client as any,
+  ///////    );
+  ///////    await expect(promise).rejects.toThrowError(BadRequestException);
+  ///////  });
+  ///////  it('Should throw ServerError on another error', async () => {
+  ///////    const { sut, sendMessageToGroupUseCaseStub } = makeSut();
+  ///////    jest
+  ///////      .spyOn(sendMessageToGroupUseCaseStub, 'execute')
+  ///////      .mockRejectedValueOnce(new DomainError.UserIsntInGroup());
+  ///////    const promise = sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      client as any,
+  ///////    );
+  ///////    await expect(promise).rejects.toThrowError(BadRequestException);
+  ///////  });
+  ///////  it('Should return message on success', async () => {
+  ///////    const { sut } = makeSut();
+  ///////    const message = await sut.handle(
+  ///////      UserEntity.create({
+  ///////        email: 'any_user_email',
+  ///////        id: 'any_user_id',
+  ///////        name: 'any_user_name',
+  ///////        password: 'any_user_password',
+  ///////      }),
+  ///////      {
+  ///////        messageContent: 'any_content',
+  ///////        groupId: 'any_group_id',
+  ///////      },
+  ///////      client as any,
+  ///////    );
+  ///////    expect(message).toEqual({
+  ///////      id: 'any_message_id',
+  ///////      content: 'any_content',
+  ///////      groupId: 'any_group_id',
+  ///////      sendDate: new Date(),
+  ///////    });
+  ///////  });
 });

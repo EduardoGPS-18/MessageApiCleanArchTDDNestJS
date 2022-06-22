@@ -11,7 +11,11 @@ export type DeleteMessageProps = {
   groupId: string;
 };
 
-export class DeleteMessageUseCase {
+export abstract class DeleteMessageUseCaseI {
+  abstract execute(props: DeleteMessageProps): Promise<void>;
+}
+
+export class DeleteMessageUseCase implements DeleteMessageUseCaseI {
   constructor(
     private userRepository: UserRepository,
     private groupRepository: GroupRepository,

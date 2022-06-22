@@ -25,7 +25,7 @@ class ValidateUserUseCaseStub implements ValidateUserUseCaseI {
 
 describe('JwtAuthGuard Tests', () => {
   beforeEach(() => {
-    context.switchToHttp = jest.fn().mockReturnValue({
+    context.switchToHttp = (): any => ({
       getRequest: () => ({
         headers: {
           authorization: 'Bearer any-token',
@@ -74,14 +74,27 @@ describe('JwtAuthGuard Tests', () => {
     await expect(promise).rejects.toThrowError(ForbiddenException);
   });
 
-  // TODO: MAKE THIS TEST WORKING
-  // it('Should add to context.body user on validation succeed', async () => {
-  //   const validateUserStub = new ValidateUserUseCaseStub();
+  it('Should add to context.body user on validation succeed', async () => {
+    const validateUserStub = new ValidateUserUseCaseStub();
 
-  //   const sut = new JwtAuthGuard(validateUserStub);
+    const localContext: any = {
+      switchToHttp: () => ({
+        getRequest: () => ({
+          headers: {
+            authorization: 'Bearer any-token',
+          },
+          body: {},
+        }),
+      }),
+    };
 
-  //   await sut.canActivate(context);
-  // });
+    const sut = new JwtAuthGuard(validateUserStub);
+    sut.addUserOnRequest = jest.fn();
+
+    await sut.canActivate(localContext);
+
+    expect(sut.addUserOnRequest).toBeCalledTimes(1);
+  });
 
   it('Should return true on validation succeed', async () => {
     const validateUserStub = new ValidateUserUseCaseStub();
@@ -89,5 +102,22 @@ describe('JwtAuthGuard Tests', () => {
 
     const result = await sut.canActivate(context);
     expect(result).toBe(true);
+  });
+
+  it('Should update user property on request', () => {
+    const validateUserStub = new ValidateUserUseCaseStub();
+    const sut = new JwtAuthGuard(validateUserStub);
+
+    const request: any = {
+      body: {},
+    };
+    const user = UserEntity.create({
+      id: 'any_id',
+      name: 'any_name',
+      email: 'any_email',
+      password: 'any_password',
+    });
+    sut.addUserOnRequest(request, user);
+    expect(request.body.user).toEqual(user);
   });
 });

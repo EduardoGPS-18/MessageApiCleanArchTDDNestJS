@@ -125,7 +125,6 @@ import { SendMessageGateway } from './@core/infra/ws/gateways/send-message';
       inject: [getDataSourceToken()],
     },
     //USE CASES
-
     {
       provide: RegisterUserUseCaseI,
       useFactory: (

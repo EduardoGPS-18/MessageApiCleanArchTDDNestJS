@@ -1,5 +1,4 @@
-import { UserEntity } from '../user';
-import { GroupEntity } from './group.entity';
+import { GroupEntity, UserEntity } from '@domain/entities';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
