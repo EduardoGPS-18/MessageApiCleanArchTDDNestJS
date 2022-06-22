@@ -1,7 +1,7 @@
 import { Payload, SessionHandler } from '@application/protocols';
 import { ValidateUserUseCase } from '@application/usecases';
 import { UserEntity } from '@domain/entities';
-import { DomainError } from '@domain/errors/domain.error';
+import { DomainError } from '@domain/errors';
 import { UserRepository } from '@domain/repositories';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));

@@ -1,5 +1,4 @@
-import { LessUserDataDto } from './less-user-data.dto';
-import { MessageDto } from './message.dto';
+import { LessUserDataDto, MessageDto } from '@presentation/dtos';
 
 export class GroupDto {
   id: string;

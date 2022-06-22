@@ -1,6 +1,6 @@
-import { MessageEntity } from '../../../domain/entities';
-import { MessageDto, MessageOfGroupDto } from '../dtos';
-import { UserMapper } from './user.mapper';
+import { MessageEntity } from '@domain/entities';
+import { MessageDto, MessageOfGroupDto } from '@presentation/dtos';
+import { UserMapper } from '@presentation/mappers';
 
 export class MessageMapper {
   static toDto(message: MessageEntity): MessageDto {

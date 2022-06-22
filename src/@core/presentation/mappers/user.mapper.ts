@@ -1,6 +1,5 @@
-import { UserEntity } from '../../../domain/entities/';
-import { AuthenticatedUserDto } from '../dtos/authenticated-user.dto';
-import { LessUserDataDto } from '../dtos/less-user-data.dto';
+import { UserEntity } from '@domain/entities';
+import { AuthenticatedUserDto, LessUserDataDto } from '@presentation/dtos';
 
 export class UserMapper {
   static toAuthenticatedUser(user: UserEntity): AuthenticatedUserDto {

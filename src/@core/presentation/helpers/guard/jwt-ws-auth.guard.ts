@@ -1,5 +1,5 @@
 import { ValidateUserUseCaseI } from '@application/usecases';
-import { UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
 import {
   CanActivate,
   ExecutionContext,
@@ -7,37 +7,33 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Socket } from 'socket.io';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
+export class JwtWsAuthGuard implements CanActivate {
   constructor(private readonly validateUserUseCase: ValidateUserUseCaseI) {}
 
-  addUserOnRequest(req: Request, user: UserEntity): void {
-    req.body.user = user;
-  }
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const httpCtx = context.switchToHttp();
-    const request = httpCtx.getRequest<Request>();
-    const { authorization } = request.headers;
+    const wsCtx = context.switchToWs();
+    const client = wsCtx.getClient<Socket>();
+
+    const { authorization } = client.handshake.headers;
+
     if (!authorization) {
       throw new ForbiddenException();
     }
     const session = authorization.split(' ')[1];
     try {
       const user = await this.validateUserUseCase.execute({ session });
-      this.addUserOnRequest(request, user);
+      client.data = {
+        user,
+      }; // TODO: Find a way to can test it
       return !!user;
     } catch (err) {
-      if (err instanceof TypeError) {
-        throw new InternalServerErrorException();
+      if (err instanceof DomainError.InvalidUser) {
+        throw new ForbiddenException();
       }
-      throw new ForbiddenException();
+      throw new InternalServerErrorException();
     }
-  }
-
-  test(arg: any): void {
-    arg.x = { test: 'teste' };
   }
 }
