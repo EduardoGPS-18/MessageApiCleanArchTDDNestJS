@@ -46,6 +46,12 @@ class GroupRepositoryStub implements GroupRepository {
 }
 
 class MessageRepositoryStub implements MessageRepository {
+  findById(id: string): Promise<MessageEntity> {
+    return;
+  }
+  delete(message: MessageEntity): Promise<void> {
+    return;
+  }
   insert(message: MessageEntity): Promise<void> {
     return;
   }

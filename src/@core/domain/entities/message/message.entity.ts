@@ -34,6 +34,14 @@ export class MessageEntity {
     this.updatedAt = updatedAt;
   }
 
+  isSender(user: UserEntity): boolean {
+    if (user.id === this.sender.id) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static create(props: CreateMessageProps): MessageEntity {
     const { id, content, sender, group } = props;
     const now = new Date();

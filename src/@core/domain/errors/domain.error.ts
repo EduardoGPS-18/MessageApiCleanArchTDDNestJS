@@ -12,5 +12,6 @@ export class DomainError {
   static UserIsntInGroup = class UserIsntInGroup extends Error {};
   static InvalidGroup = class InvalidGroup extends Error {};
 
-  static InvalidMessage = class InvalidGroup extends Error {};
+  static InvalidMessage = class InvalidMessage extends Error {};
+  static CurrentUserIsntMessageOwner = class CurrentUserIsntMessageOwner extends Error {};
 }

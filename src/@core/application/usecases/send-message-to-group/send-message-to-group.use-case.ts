@@ -43,7 +43,6 @@ export class SendMessageToGroupUseCase implements SendMessageToGroupUseCaseI {
       if (!group.isUserInGroup(sender)) {
         throw new DomainError.UserIsntInGroup();
       }
-
       await this.messageRepository.insert(message);
 
       return message;

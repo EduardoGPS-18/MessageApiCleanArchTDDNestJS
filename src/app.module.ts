@@ -49,11 +49,9 @@ import { CreateGroupController } from './@core/infra/http/controllers/add-group'
 import { AddUserToGroupController } from './@core/infra/http/controllers/add-user-to-group';
 import { GetGroupMessageListController } from './@core/infra/http/controllers/get-group-messages';
 import { LoginController } from './@core/infra/http/controllers/login';
-import { SendMessageController } from './@core/infra/http/controllers/send-message';
 import { SignupController } from './@core/infra/http/controllers/signup';
 import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
-
-//TODO: IMPLEMENT APP MODULE
+import { SendMessageGateway } from './@core/infra/ws/gateways/send-message';
 
 @Module({
   imports: [
@@ -214,13 +212,13 @@ import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
       },
       inject: [UserRepository, GroupRepository],
     },
+    SendMessageGateway,
   ],
   controllers: [
     LoginController,
     SignupController,
     CreateGroupController,
     GetGroupMessageListController,
-    SendMessageController,
     AddUserToGroupController,
   ],
 })
