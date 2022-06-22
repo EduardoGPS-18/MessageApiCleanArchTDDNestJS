@@ -8,8 +8,9 @@
   },
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/src/$1",
-    "^@infra/(.*)$*": ["<rootDir>/src/@core/infra/*"],
-    "^@domain/(.*)*": ["<rootDir>/src/@core/domain/*"],
-    "^@application/(.*)*": ["<rootDir>/src/@core/application/*"]
+    "^@infra/(.*)*": ["src/@core/infra/$1"],
+    "^@domain/(.*)*": ["src/@core/domain/$1*"],
+    "^@application/(.*)*": ["src/@core/application/$1"],
+    "^@presentation/(.*)*": ["src/@core/presentation/$1"]
   }
 }

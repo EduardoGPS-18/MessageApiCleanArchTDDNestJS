@@ -86,7 +86,8 @@
       "^src/(.*)$": "<rootDir>/src/$1",
       "^@infra/(.*)*": ["src/@core/infra/$1"],
       "^@domain/(.*)*": ["src/@core/domain/$1*"],
-      "^@application/(.*)*": ["src/@core/application/$1"]
+      "^@application/(.*)*": ["src/@core/application/$1"],
+      "^@presentation/(.*)*": ["src/@core/presentation/$1"]
     }
   }
 }

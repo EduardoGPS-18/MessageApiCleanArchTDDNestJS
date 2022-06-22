@@ -22,6 +22,7 @@
       "@infra/*": ["src/@core/infra/*"],
       "@domain/*": ["src/@core/domain/*"],
       "@application/*": ["src/@core/application/*"],
+      "@presentation/*": ["src/@core/presentation/*"],
     }
   },
 }
