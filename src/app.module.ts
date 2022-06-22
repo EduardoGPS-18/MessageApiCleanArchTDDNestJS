@@ -1,57 +1,49 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import {
-  Encrypter,
-  Hasher,
-  SessionHandler,
-} from './@core/application/protocols';
+import { Encrypter, Hasher, SessionHandler } from '@application/protocols';
 import {
   AddUserToGroupUseCase,
   AddUserToGroupUseCaseI,
+  CreateGroupUseCase,
+  CreateGroupUseCaseI,
+  GetGroupMessageListUseCase,
+  GetGroupMessageListUseCaseI,
   LoginUserUseCase,
   LoginUserUseCaseI,
   RegisterUserUseCase,
   RegisterUserUseCaseI,
-} from './@core/application/usecases';
-import {
-  CreateGroupUseCase,
-  CreateGroupUseCaseI,
-} from './@core/application/usecases/create-group';
-import {
-  GetGroupMessageListUseCase,
-  GetGroupMessageListUseCaseI,
-} from './@core/application/usecases/get-group-messages';
-import {
   SendMessageToGroupUseCase,
   SendMessageToGroupUseCaseI,
-} from './@core/application/usecases/send-message-to-group';
-import {
   ValidateUserUseCase,
   ValidateUserUseCaseI,
-} from './@core/application/usecases/validate-user';
+} from '@application/usecases';
 import {
   GroupRepository,
   MessageRepository,
   UserRepository,
-} from './@core/domain/repositories';
-import { BcryptAdapter } from './@core/infra/adapters/bcrypt';
-import { JwtSessionHandlerAdapter } from './@core/infra/adapters/session';
-import { OrmGroupRepositoryAdapter } from './@core/infra/db/repositories/group';
-import { OrmMessageRepositoryAdapter } from './@core/infra/db/repositories/message';
-import { OrmUserRepositoryAdapter } from './@core/infra/db/repositories/user';
-import { GroupSchema } from './@core/infra/db/typeorm/group';
-import { MessageScheme } from './@core/infra/db/typeorm/message';
-import { UserSchema } from './@core/infra/db/typeorm/user';
-import { CreateGroupController } from './@core/infra/http/controllers/add-group';
-import { AddUserToGroupController } from './@core/infra/http/controllers/add-user-to-group';
-import { GetGroupMessageListController } from './@core/infra/http/controllers/get-group-messages';
-import { LoginController } from './@core/infra/http/controllers/login';
-import { SignupController } from './@core/infra/http/controllers/signup';
-import { JwtAuthGuard } from './@core/infra/http/helpers/guard';
-import { SendMessageGateway } from './@core/infra/ws/gateways/send-message';
+} from '@domain/repositories';
+import { BcryptAdapter, JwtSessionHandlerAdapter } from '@infra/adapters';
+import {
+  OrmGroupRepositoryAdapter,
+  OrmMessageRepositoryAdapter,
+  OrmUserRepositoryAdapter,
+} from '@infra/db/repositories';
+import { GroupSchema, MessageScheme, UserSchema } from '@infra/db/typeorm';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
+import {
+  AddUserToGroupController,
+  CreateGroupController,
+  GetGroupMessageListController,
+  LoginController,
+  SignupController,
+} from '@presentation/controllers';
+import {
+  DeleteMessageGateway,
+  SendMessageGateway,
+} from '@presentation/gateways';
+import { JwtAuthGuard } from '@presentation/helpers/guard';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -75,7 +67,7 @@ import { SendMessageGateway } from './@core/infra/ws/gateways/send-message';
         port: config.get('DB_PORT'),
         username: config.get('DB_USER'),
         password: config.get('DB_PASSWORD'),
-        entities: [__dirname + './**/**/**/**/*.scheme{.ts,.js}'],
+        entities: [__dirname + './**/**/**/*.scheme{.ts,.js}'],
         synchronize: true,
         autoLoadEntities: true,
       }),
@@ -212,6 +204,7 @@ import { SendMessageGateway } from './@core/infra/ws/gateways/send-message';
       inject: [UserRepository, GroupRepository],
     },
     SendMessageGateway,
+    DeleteMessageGateway,
   ],
   controllers: [
     LoginController,
