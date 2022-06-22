@@ -1,12 +1,12 @@
 import * as crypto from 'crypto'; // (* as mod) CUIDADO AO IMPORTAR !
 
-import { DomainError } from '../../../domain/errors/domain.error';
-import { RepositoryError } from '../../../domain/errors/repository.error';
+import { DomainError } from '@domain/errors/domain.error';
+import { RepositoryError } from '@domain/errors/repository.error';
 
-import { RegisterUserUseCase } from '.';
-import { UserEntity } from '../../../domain/entities/';
-import { UserRepository } from '../../../domain/repositories';
-import { Hasher, Payload, SessionHandler } from '../../protocols';
+import { Hasher, Payload, SessionHandler } from '@application/protocols';
+import { RegisterUserUseCase } from '@application/usecases';
+import { UserEntity } from '@domain/entities/';
+import { UserRepository } from '@domain/repositories';
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn(() => 'gen_uuid'),

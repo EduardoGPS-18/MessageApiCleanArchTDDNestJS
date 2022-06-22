@@ -1,11 +1,11 @@
-import * as crypto from 'crypto';
-import { MessageEntity } from '../../../domain/entities';
-import { DomainError } from '../../../domain/errors/domain.error';
+import { MessageEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
 import {
   GroupRepository,
   MessageRepository,
   UserRepository,
-} from '../../../domain/repositories';
+} from '@domain/repositories';
+import * as crypto from 'crypto';
 
 export type SendMessageToGroupProps = {
   groupId: string;

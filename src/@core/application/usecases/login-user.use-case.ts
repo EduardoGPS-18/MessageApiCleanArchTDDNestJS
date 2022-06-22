@@ -1,7 +1,7 @@
 import { Encrypter, SessionHandler } from '@application/protocols';
-import { UserEntity } from '@domain/entities/';
+import { UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
 import { UserRepository } from '@domain/repositories';
-import { DomainError } from '../../../domain/errors';
 
 export type LoginUserProps = {
   email: string;

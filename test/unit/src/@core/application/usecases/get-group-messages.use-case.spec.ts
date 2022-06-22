@@ -1,16 +1,11 @@
-import { GetGroupMessageListUseCase } from '.';
-import {
-  GroupEntity,
-  MessageEntity,
-  UserEntity,
-} from '../../../domain/entities';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { RepositoryError } from '../../../domain/errors/repository.error';
+import { GetGroupMessageListUseCase } from '@application/usecases';
+import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
+import { DomainError, RepositoryError } from '@domain/errors';
 import {
   GroupRepository,
   MessageRepository,
   UserRepository,
-} from '../../../domain/repositories';
+} from '@domain/repositories';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 

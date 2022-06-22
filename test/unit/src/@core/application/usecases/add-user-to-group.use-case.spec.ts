@@ -1,7 +1,7 @@
-import { AddUserToGroupUseCase } from '.';
-import { GroupEntity, UserEntity } from '../../../domain/entities';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { GroupRepository, UserRepository } from '../../../domain/repositories';
+import { AddUserToGroupUseCase } from '@application/usecases';
+import { GroupEntity, UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
+import { GroupRepository, UserRepository } from '@domain/repositories';
 
 const mockedOwner = UserEntity.create({
   id: 'any_owner_id',

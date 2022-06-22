@@ -1,14 +1,13 @@
-import { UserEntity } from '../../../domain/entities/';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { RepositoryError } from '../../../domain/errors/repository.error';
-import { UserRepository } from '../../../domain/repositories';
 import {
   Encrypter,
   EncryptProps,
   Payload,
   SessionHandler,
-} from '../../protocols';
-import { LoginUserUseCase } from './login-user.use-case';
+} from '@application/protocols';
+import { LoginUserUseCase } from '@application/usecases';
+import { UserEntity } from '@domain/entities';
+import { DomainError, RepositoryError } from '@domain/errors';
+import { UserRepository } from '@domain/repositories';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 

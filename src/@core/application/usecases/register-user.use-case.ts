@@ -1,9 +1,9 @@
 import * as crypto from 'crypto';
 
-import { UserEntity } from '../../../domain/entities/';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { UserRepository } from '../../../domain/repositories';
-import { Hasher, SessionHandler } from '../../protocols';
+import { Hasher, SessionHandler } from '@application/protocols';
+import { UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
+import { UserRepository } from '@domain/repositories';
 
 export type RegisterUserProps = {
   name: string;

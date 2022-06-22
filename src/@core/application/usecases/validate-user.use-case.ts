@@ -1,7 +1,7 @@
-import { UserEntity } from '../../../domain/entities/';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { UserRepository } from '../../../domain/repositories';
-import { SessionHandler } from '../../protocols';
+import { SessionHandler } from '@application/protocols';
+import { UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
+import { UserRepository } from '@domain/repositories';
 
 export type ValidateUserProps = {
   session: string;

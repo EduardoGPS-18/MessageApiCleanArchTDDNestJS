@@ -1,16 +1,12 @@
-import * as crypto from 'crypto';
-import {
-  GroupEntity,
-  MessageEntity,
-  UserEntity,
-} from '../../../domain/entities';
-import { DomainError } from '../../../domain/errors/domain.error';
+import { SendMessageToGroupUseCase } from '@application/usecases';
+import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
 import {
   GroupRepository,
   MessageRepository,
   UserRepository,
-} from '../../../domain/repositories';
-import { SendMessageToGroupUseCase } from './send-message-to-group.use-case';
+} from '@domain/repositories';
+import * as crypto from 'crypto';
 
 jest.mock('crypto');
 

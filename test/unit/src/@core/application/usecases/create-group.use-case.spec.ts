@@ -1,10 +1,8 @@
+import { CreateGroupUseCase } from '@application/usecases';
+import { GroupEntity, UserEntity } from '@domain/entities';
+import { DomainError, RepositoryError } from '@domain/errors';
+import { GroupRepository, UserRepository } from '@domain/repositories';
 import * as crypto from 'crypto';
-import { UserEntity } from '../../../domain/entities';
-import { GroupEntity } from '../../../domain/entities/group';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { RepositoryError } from '../../../domain/errors/repository.error';
-import { GroupRepository, UserRepository } from '../../../domain/repositories';
-import { CreateGroupUseCase } from './create-group.use-case';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 jest.mock('crypto');

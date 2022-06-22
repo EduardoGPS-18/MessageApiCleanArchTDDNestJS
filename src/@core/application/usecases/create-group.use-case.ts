@@ -1,8 +1,7 @@
+import { GroupEntity, MessageEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
+import { GroupRepository, UserRepository } from '@domain/repositories';
 import * as crypto from 'crypto';
-import { MessageEntity } from '../../../domain/entities';
-import { GroupEntity } from '../../../domain/entities/group';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { GroupRepository, UserRepository } from '../../../domain/repositories';
 
 export type CreateGroupUseCaseProps = {
   name: string;

@@ -1,6 +1,6 @@
-import { GroupEntity } from '../../../domain/entities';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { GroupRepository, UserRepository } from '../../../domain/repositories';
+import { GroupEntity } from '@domain/entities';
+import { DomainError } from '@domain/errors';
+import { GroupRepository, UserRepository } from '@domain/repositories';
 
 export type AddUserToGroupProps = {
   groupId: string;

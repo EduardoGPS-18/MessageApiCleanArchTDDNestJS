@@ -1,9 +1,9 @@
-import { DomainError } from '../../../domain/errors/domain.error';
+import { DomainError } from '@domain/errors';
 import {
   GroupRepository,
   MessageRepository,
   UserRepository,
-} from '../../../domain/repositories';
+} from '@domain/repositories';
 
 export type DeleteMessageProps = {
   messageId: string;

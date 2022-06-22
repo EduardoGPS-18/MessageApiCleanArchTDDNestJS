@@ -1,16 +1,14 @@
 import {
-  GroupEntity,
-  MessageEntity,
-  UserEntity,
-} from '../../../domain/entities';
-import { DomainError } from '../../../domain/errors/domain.error';
-import { RepositoryError } from '../../../domain/errors/repository.error';
+  DeleteMessageUseCase,
+  DeleteMessageUseCaseI,
+} from '@application/usecases';
+import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
+import { DomainError, RepositoryError } from '@domain/errors';
 import {
   GroupRepository,
   MessageRepository,
   UserRepository,
-} from '../../../domain/repositories';
-import { DeleteMessageUseCase } from './delete-message-of-group.usecase';
+} from '@domain/repositories';
 
 const mockedMsg = MessageEntity.create({
   id: 'any_message_id',
@@ -97,7 +95,7 @@ class UserRepositoryStub implements UserRepository {
   }
 }
 type SutTypes = {
-  sut: DeleteMessageUseCase;
+  sut: DeleteMessageUseCaseI;
   userRepository: UserRepositoryStub;
   groupRepository: GroupRepositoryStub;
   messageRepository: MessageRepositoryStub;
