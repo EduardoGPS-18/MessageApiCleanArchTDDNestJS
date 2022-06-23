@@ -13,7 +13,6 @@ describe('AddUserToRequest (suit)', () => {
   it('Should add user to request object', () => {
     const object: any = {};
     addUserToObjectHelper(object, user);
-    console.log(object);
-    expect(object.any).toEqual(user);
+    expect(object.user).toEqual(user);
   });
 });
