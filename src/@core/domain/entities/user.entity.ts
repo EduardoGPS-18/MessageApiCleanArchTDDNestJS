@@ -1,4 +1,4 @@
-import { DateMetadataProps } from '@domain/entities/helpers';
+import { DateMetadataProps } from '@domain/helpers';
 
 export type CreateUserProps = {
   id: string;

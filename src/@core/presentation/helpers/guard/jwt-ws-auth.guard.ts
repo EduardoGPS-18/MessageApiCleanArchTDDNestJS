@@ -27,7 +27,7 @@ export class JwtWsAuthGuard implements CanActivate {
       const user = await this.validateUserUseCase.execute({ session });
       client.data = {
         user,
-      }; // TODO: Find a way to can test it
+      };
       return !!user;
     } catch (err) {
       if (err instanceof DomainError.InvalidUser) {

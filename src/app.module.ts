@@ -4,6 +4,8 @@ import {
   AddUserToGroupUseCaseI,
   CreateGroupUseCase,
   CreateGroupUseCaseI,
+  DeleteMessageUseCase,
+  DeleteMessageUseCaseI,
   GetGroupMessageListUseCase,
   GetGroupMessageListUseCaseI,
   LoginUserUseCase,
@@ -202,6 +204,21 @@ import { DataSource } from 'typeorm';
         return new AddUserToGroupUseCase(groupRepository, userRepository);
       },
       inject: [UserRepository, GroupRepository],
+    },
+    {
+      provide: DeleteMessageUseCaseI,
+      useFactory: (
+        userRepository: UserRepository,
+        groupRepository: GroupRepository,
+        messageRepository: MessageRepository,
+      ) => {
+        return new DeleteMessageUseCase(
+          userRepository,
+          groupRepository,
+          messageRepository,
+        );
+      },
+      inject: [UserRepository, GroupRepository, MessageRepository],
     },
     SendMessageGateway,
     DeleteMessageGateway,

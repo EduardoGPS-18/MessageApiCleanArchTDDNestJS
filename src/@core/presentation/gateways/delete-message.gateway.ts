@@ -1,4 +1,4 @@
-import { DeleteMessageUseCase } from '@application/usecases';
+import { DeleteMessageUseCaseI } from '@application/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import {
@@ -24,7 +24,7 @@ export class DeleteMessageGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private deleteMessageUseCase: DeleteMessageUseCase) {}
+  constructor(private deleteMessageUseCase: DeleteMessageUseCaseI) {}
 
   @SubscribeMessage('delete')
   @UseGuards(JwtWsAuthGuard)
