@@ -1,33 +1,19 @@
 import { UserEntity } from '@domain/entities';
 import { RepositoryError } from '@domain/errors';
 import { OrmUserRepositoryAdapter } from '@infra/db/repositories';
-import { UserSchema } from '@infra/db/typeorm';
 import * as crypto from 'crypto';
-import { DataSource, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+
+let repository: Repository<UserEntity> = jest.genMockFromModule('typeorm');
 
 type SutTypes = {
   ormUserRepository: Repository<UserEntity>;
   sut: OrmUserRepositoryAdapter;
-  dataSource: DataSource;
 };
-const makeSut = async (): Promise<SutTypes> => {
-  const dataSource = new DataSource({
-    type: 'postgres',
-    synchronize: true,
-    database: 'message_db_tst',
-    username: 'docker',
-    host: 'localhost',
-    password: 'senha123',
-    port: 5432,
-    logging: false,
-    entities: [UserSchema],
-  });
-  if (!dataSource.isInitialized) {
-    await dataSource.initialize();
-  }
-  const ormUserRepository = dataSource.getRepository(UserEntity);
-  const sut = new OrmUserRepositoryAdapter(ormUserRepository);
-  return { sut, ormUserRepository, dataSource };
+const makeSut = (): SutTypes => {
+  const ormUserRepository = repository;
+  const sut = new OrmUserRepositoryAdapter(repository);
+  return { sut, ormUserRepository };
 };
 
 describe('Orm User Repository adapter', () => {
@@ -41,6 +27,13 @@ describe('Orm User Repository adapter', () => {
     session: 'any_session',
     updateSession(session: string): void {},
   };
+  beforeEach(() => {
+    const { ormUserRepository } = makeSut();
+
+    ormUserRepository.findBy = jest.fn();
+    ormUserRepository.save = jest.fn();
+    ormUserRepository.findOneBy = jest.fn();
+  });
 
   describe('FindOneByEmail', () => {
     it('Should call orm with correct values', async () => {

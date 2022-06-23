@@ -2,31 +2,27 @@ import { GroupEntity } from '@domain/entities';
 import { UserEntity } from '@domain/entities/';
 import { RepositoryError } from '@domain/errors';
 import { OrmGroupRepositoryAdapter } from '@infra/db/repositories';
-import { GroupSchema } from '@infra/db/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+
+let repository: Repository<GroupEntity> = jest.genMockFromModule('typeorm');
 
 type SutTypes = {
   sut: OrmGroupRepositoryAdapter;
   ormGroupRepository: Repository<GroupEntity>;
 };
 const makeSut = (): SutTypes => {
-  const datasource = new DataSource({
-    type: 'postgres',
-    synchronize: true,
-    database: 'message_db_tst',
-    username: 'docker',
-    host: 'localhost',
-    password: 'senha123',
-    port: 5432,
-    logging: false,
-    entities: [GroupSchema],
-  });
-  const ormGroupRepository = datasource.getRepository(GroupSchema);
+  const ormGroupRepository = repository;
   const sut = new OrmGroupRepositoryAdapter(ormGroupRepository);
   return { sut, ormGroupRepository };
 };
 
 describe('OrmGroup Repository Adapter', () => {
+  beforeEach(() => {
+    const { ormGroupRepository } = makeSut();
+    ormGroupRepository.save = jest.fn();
+    ormGroupRepository.findOneBy = jest.fn();
+  });
+
   describe('Insert', () => {
     it('Should call dependencies correctly', async () => {
       const { sut, ormGroupRepository } = makeSut();
