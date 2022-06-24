@@ -5,11 +5,13 @@ import { UserMapper } from '@presentation/mappers';
 export class MessageMapper {
   static toDto(message: MessageEntity): MessageDto {
     const { id, content, createdAt, sender, group } = message;
+    const { id: groupId } = group;
     return {
       id: id,
       content: content,
-      groupId: group.id,
+      groupId: groupId,
       sendDate: createdAt,
+      sender: UserMapper.toLessUserData(sender),
     };
   }
 

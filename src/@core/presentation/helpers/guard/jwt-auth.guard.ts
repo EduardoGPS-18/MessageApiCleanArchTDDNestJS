@@ -1,5 +1,4 @@
 import { ValidateUserUseCaseI } from '@application/usecases';
-import { UserEntity } from '@domain/entities';
 import {
   CanActivate,
   ExecutionContext,
@@ -7,15 +6,12 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { GuardHelpers } from '@presentation/helpers/guard';
 import { Request } from 'express';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(private readonly validateUserUseCase: ValidateUserUseCaseI) {}
-
-  addUserOnRequest(req: Request, user: UserEntity): void {
-    req.body.user = user;
-  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const httpCtx = context.switchToHttp();
@@ -27,7 +23,7 @@ export class JwtAuthGuard implements CanActivate {
     const session = authorization.split(' ')[1];
     try {
       const user = await this.validateUserUseCase.execute({ session });
-      this.addUserOnRequest(request, user);
+      GuardHelpers.addUserToObject(request, user);
       return !!user;
     } catch (err) {
       if (err instanceof TypeError) {
@@ -35,9 +31,5 @@ export class JwtAuthGuard implements CanActivate {
       }
       throw new ForbiddenException();
     }
-  }
-
-  test(arg: any): void {
-    arg.x = { test: 'teste' };
   }
 }

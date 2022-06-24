@@ -1,5 +1,7 @@
 import { UserEntity } from '@domain/entities';
 
-export function addUserToObjectHelper(object: Object, user: UserEntity) {
-  object['user'] = user;
+export class GuardHelpers {
+  static addUserToObject(object: Object, user: UserEntity) {
+    object['user'] = user;
+  }
 }

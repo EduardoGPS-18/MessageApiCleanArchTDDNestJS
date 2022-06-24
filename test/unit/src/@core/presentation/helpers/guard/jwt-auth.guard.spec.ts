@@ -2,9 +2,10 @@ import { ValidateUserProps, ValidateUserUseCaseI } from '@application/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { JwtAuthGuard } from '@presentation/helpers/guard';
+import { GuardHelpers, JwtAuthGuard } from '@presentation/helpers/guard';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
 let context: ExecutionContext = jest.genMockFromModule('@nestjs/common');
 
 class ValidateUserUseCaseStub implements ValidateUserUseCaseI {
@@ -30,6 +31,7 @@ describe('JwtAuthGuard Tests', () => {
         body: {},
       }),
     });
+    GuardHelpers.addUserToObject = jest.fn();
   });
 
   it('Should call usecase correctly', async () => {
@@ -71,10 +73,10 @@ describe('JwtAuthGuard Tests', () => {
     await expect(promise).rejects.toThrowError(ForbiddenException);
   });
 
-  it('Should add to context.body user on validation succeed', async () => {
+  it('Should call GuardHelpers.addUserToObject with correct values', async () => {
     const validateUserStub = new ValidateUserUseCaseStub();
 
-    const localContext: any = {
+    const localContext = {
       switchToHttp: () => ({
         getRequest: () => ({
           headers: {
@@ -84,13 +86,20 @@ describe('JwtAuthGuard Tests', () => {
         }),
       }),
     };
-
+    const request = localContext.switchToHttp().getRequest();
     const sut = new JwtAuthGuard(validateUserStub);
-    sut.addUserOnRequest = jest.fn();
 
-    await sut.canActivate(localContext);
+    await sut.canActivate(localContext as any);
 
-    expect(sut.addUserOnRequest).toBeCalledTimes(1);
+    expect(GuardHelpers.addUserToObject).toBeCalledWith(
+      request,
+      UserEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        email: 'any_email',
+        password: 'any_password',
+      }),
+    );
   });
 
   it('Should return true on validation succeed', async () => {
@@ -99,22 +108,5 @@ describe('JwtAuthGuard Tests', () => {
 
     const result = await sut.canActivate(context);
     expect(result).toBe(true);
-  });
-
-  it('Should update user property on request', () => {
-    const validateUserStub = new ValidateUserUseCaseStub();
-    const sut = new JwtAuthGuard(validateUserStub);
-
-    const request: any = {
-      body: {},
-    };
-    const user = UserEntity.create({
-      id: 'any_id',
-      name: 'any_name',
-      email: 'any_email',
-      password: 'any_password',
-    });
-    sut.addUserOnRequest(request, user);
-    expect(request.body.user).toEqual(user);
   });
 });

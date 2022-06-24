@@ -60,6 +60,9 @@ class GroupRepositoryStub implements GroupRepository {
 }
 
 class MessageRepositoryStub implements MessageRepository {
+  update(message: MessageEntity): Promise<void> {
+    return;
+  }
   findById(id: string): Promise<MessageEntity> {
     return;
   }

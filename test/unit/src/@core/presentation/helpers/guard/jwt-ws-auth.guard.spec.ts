@@ -6,7 +6,7 @@ import {
   ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { JwtWsAuthGuard } from '@presentation/helpers/guard';
+import { GuardHelpers, JwtWsAuthGuard } from '@presentation/helpers/guard';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 let context: ExecutionContext = jest.genMockFromModule('@nestjs/common');
@@ -35,6 +35,7 @@ describe('JwtWsAuthGuard Tests', () => {
         },
       }),
     });
+    GuardHelpers.addUserToObject = jest.fn();
   });
 
   it('Should call usecase correctly', async () => {
@@ -77,14 +78,23 @@ describe('JwtWsAuthGuard Tests', () => {
     await expect(promise).rejects.toThrowError(InternalServerErrorException);
   });
 
-  // TODO: MAKE THIS TEST WORKING
-  // it('Should add to context.body user on validation succeed', async () => {
-  //   const validateUserStub = new ValidateUserUseCaseStub();
+  it('Should call GuardHelpers.addUserToObject with correct values', async () => {
+    const validateUserStub = new ValidateUserUseCaseStub();
+    const sut = new JwtWsAuthGuard(validateUserStub);
 
-  //   const sut = new JwtWsAuthGuard(validateUserStub);
+    await sut.canActivate(context);
+    const client = context.switchToWs().getClient();
 
-  //   await sut.canActivate(context);
-  // });
+    expect(GuardHelpers.addUserToObject).toBeCalledWith(
+      client,
+      UserEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        email: 'any_email',
+        password: 'any_password',
+      }),
+    );
+  });
 
   it('Should return true on validation succeed', async () => {
     const validateUserStub = new ValidateUserUseCaseStub();

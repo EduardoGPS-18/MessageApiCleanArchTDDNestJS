@@ -7,6 +7,15 @@ export class OrmMessageRepositoryAdapter implements MessageRepository {
   constructor(
     private readonly ormMessageRepository: Repository<MessageEntity>,
   ) {}
+
+  async update(message: MessageEntity): Promise<void> {
+    try {
+      await this.ormMessageRepository.save(message);
+    } catch (err) {
+      throw new RepositoryError.OperationError();
+    }
+  }
+
   async findById(id: string): Promise<MessageEntity> {
     try {
       return await this.ormMessageRepository.findOneBy({ id });

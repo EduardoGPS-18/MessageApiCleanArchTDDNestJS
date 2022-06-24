@@ -116,4 +116,39 @@ describe('Message entity', () => {
       expect(message.isSender(notSender)).toBe(false);
     });
   });
+
+  describe('update Message Content', () => {
+    const sender = UserEntity.create({
+      id: 'sender_user_id',
+      email: 'sender_user_email',
+      name: 'sender_user_name',
+      password: 'sender_user_password',
+      session: 'sender_user_session',
+    });
+    const messageFactory = () =>
+      MessageEntity.create({
+        group: GroupEntity.create({
+          id: 'any_group_id',
+          description: 'any_group_description',
+          messages: [],
+          name: 'any_group_name',
+          owner: UserEntity.create({
+            email: 'any_user_email',
+            id: 'any_user_id',
+            name: 'any_user_name',
+            password: 'any_user_password',
+          }),
+          users: [],
+        }),
+        id: 'any_id',
+        content: 'any_content',
+        sender: sender,
+      });
+
+    it('Should change message content', () => {
+      const message = messageFactory();
+      message.updateMessageContent('new_content');
+      expect(message.content).toBe('new_content');
+    });
+  });
 });

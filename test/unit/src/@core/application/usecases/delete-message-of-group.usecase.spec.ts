@@ -34,6 +34,9 @@ const mockedMsg = MessageEntity.create({
   }),
 });
 class MessageRepositoryStub implements MessageRepository {
+  update(message: MessageEntity): Promise<void> {
+    return;
+  }
   async findById(id: string): Promise<MessageEntity> {
     return mockedMsg;
   }

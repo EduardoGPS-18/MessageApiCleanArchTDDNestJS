@@ -42,6 +42,10 @@ export class MessageEntity {
     }
   }
 
+  updateMessageContent(messageContent: string): void {
+    this.content = messageContent;
+  }
+
   static create(props: CreateMessageProps): MessageEntity {
     const { id, content, sender, group } = props;
     const now = new Date();

@@ -105,6 +105,74 @@ describe('OrmMessageRepository Adapter', () => {
     });
   });
 
+  describe('Update', () => {
+    it('Should call dependencies correctly', async () => {
+      const { sut, ormMessageRepository } = makeSut();
+      const message = MessageEntity.create({
+        content: 'any_content',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
+        id: 'any_id',
+        sender: UserEntity.create({
+          email: 'any_email',
+          id: 'any_id',
+          name: 'any_name',
+          password: 'any_password',
+        }),
+      });
+
+      jest.spyOn(ormMessageRepository, 'save');
+      await sut.update(message);
+      expect(ormMessageRepository.save).toHaveBeenCalledWith(message);
+    });
+
+    it('Should throw RepositoryError.OperationError if Repository throws', async () => {
+      const { sut, ormMessageRepository } = makeSut();
+      const message = MessageEntity.create({
+        content: 'any_content',
+        group: GroupEntity.create({
+          id: 'any_group',
+          description: 'any_description',
+          messages: [],
+          name: 'any_name',
+          owner: UserEntity.create({
+            id: 'owner_id',
+            email: 'owner_email',
+            name: 'owner_name',
+            password: 'owner_password',
+          }),
+          users: [],
+        }),
+        id: 'any_id',
+        sender: UserEntity.create({
+          email: 'any_email',
+          id: 'any_id',
+          name: 'any_name',
+          password: 'any_password',
+        }),
+      });
+
+      jest
+        .spyOn(ormMessageRepository, 'save')
+        .mockRejectedValueOnce(new Error());
+      const promise = sut.update(message);
+      await expect(promise).rejects.toThrowError(
+        RepositoryError.OperationError,
+      );
+    });
+  });
+
   describe('Delete', () => {
     it('Should call dependencies correctly', async () => {
       const { sut, ormMessageRepository } = makeSut();

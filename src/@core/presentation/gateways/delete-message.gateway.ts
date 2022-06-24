@@ -1,12 +1,7 @@
 import { DeleteMessageUseCaseI } from '@application/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
-import {
-  BadRequestException,
-  ForbiddenException,
-  InternalServerErrorException,
-  UseGuards,
-} from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -48,16 +43,15 @@ export class DeleteMessageGateway {
         err instanceof DomainError.CurrentUserIsntMessageOwner
       ) {
         client.emit('error', { error: 'Unauthorized' });
-        throw new ForbiddenException();
+        return;
       } else if (
         err instanceof DomainError.InvalidGroup ||
         err instanceof DomainError.InvalidMessage
       ) {
         client.emit('error', { error: 'Invalid sended arguments' });
-        throw new BadRequestException();
+        return;
       }
       client.emit('error', { error: 'Internal server exception' });
-      throw new InternalServerErrorException();
     }
   }
 }

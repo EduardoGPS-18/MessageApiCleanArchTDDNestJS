@@ -1,11 +1,7 @@
 import { SendMessageToGroupUseCaseI } from '@application/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  UseGuards,
-} from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -21,7 +17,6 @@ import { JwtWsAuthGuard } from '@presentation/helpers/guard';
 import { MessageMapper } from '@presentation/mappers';
 import { Server, Socket } from 'socket.io';
 
-//TODO: TEST SOCKET ITEMS
 @WebSocketGateway({ namespace: 'messages' })
 export class SendMessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -58,7 +53,9 @@ export class SendMessageGateway
       });
       this.server
         .in(message.group.id)
-        .emit('new-messages', { message: message });
+        .emit('new-messages', {
+          message: MessageMapper.toMessageOfGroupDto(message),
+        });
 
       return MessageMapper.toDto(message);
     } catch (err) {
@@ -69,10 +66,9 @@ export class SendMessageGateway
         err instanceof DomainError.InvalidMessage
       ) {
         client.emit('error', { error: 'Invalid sended arguments' });
-        throw new BadRequestException();
+        return;
       }
       client.emit('error', { error: 'Server error' });
-      throw new InternalServerErrorException();
     }
   }
 }

@@ -2,6 +2,7 @@ export * from './add-user-to-group.dto';
 export * from './authenticated-user.dto';
 export * from './create-group.dto';
 export * from './delete-message.dto';
+export * from './edit-message.dto';
 export * from './get-message-list-by-group.dto';
 export * from './group.dto';
 export * from './less-user-data.dto';
