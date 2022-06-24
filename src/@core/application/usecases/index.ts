@@ -3,6 +3,7 @@ export * from './create-group.use-case';
 export * from './delete-message-of-group.usecase';
 export * from './edit-message.use-case';
 export * from './get-group-messages.use-case';
+export * from './get-user-group-list.use-case';
 export * from './login-user.use-case';
 export * from './register-user.use-case';
 export * from './send-message-to-group.use-case';

@@ -8,6 +8,9 @@ jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 jest.mock('crypto');
 
 class GroupRepositoryStub implements GroupRepository {
+  findByUser(user: UserEntity): Promise<GroupEntity[]> {
+    return;
+  }
   update(group: GroupEntity): Promise<void> {
     return;
   }

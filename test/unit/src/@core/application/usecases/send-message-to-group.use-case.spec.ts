@@ -15,6 +15,9 @@ jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 jest.spyOn(crypto, 'randomUUID').mockReturnValue('gen_uuid');
 
 class GroupRepositoryStub implements GroupRepository {
+  findByUser(user: UserEntity): Promise<GroupEntity[]> {
+    return;
+  }
   update(group: GroupEntity): Promise<void> {
     return;
   }

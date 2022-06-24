@@ -7,7 +7,6 @@ export type EditMessageProps = {
   newMessageContent: string;
   currentUserId: string;
 };
-
 export abstract class EditMessageUseCaseI {
   abstract execute(props: EditMessageProps): Promise<MessageEntity>;
 }

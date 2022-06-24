@@ -48,6 +48,9 @@ class UserRepositoryStub implements UserRepository {
 }
 
 class GroupRepositoryStub implements GroupRepository {
+  findByUser(user: UserEntity): Promise<GroupEntity[]> {
+    return;
+  }
   insert(group: GroupEntity): Promise<void> {
     return;
   }
