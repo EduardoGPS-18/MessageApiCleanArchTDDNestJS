@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 let repository: Repository<MessageEntity> = jest.genMockFromModule('typeorm');
-//TODO: REFACTOR OTHER REPOSITORIES WITH SAME STRATEGY
 
 type SutTypes = {
   sut: OrmMessageRepositoryAdapter;

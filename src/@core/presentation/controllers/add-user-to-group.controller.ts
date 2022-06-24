@@ -15,6 +15,8 @@ import { GetUserEntity } from '@presentation/helpers/decorators';
 import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupMapper } from '@presentation/mappers';
 
+//TODO: CHANGE THIS ROUTE TO WS
+
 @Controller('group')
 export class AddUserToGroupController {
   constructor(private addUserToGroupUseCase: AddUserToGroupUseCaseI) {}
