@@ -92,7 +92,7 @@ describe('JwtAuthGuard Tests', () => {
     await sut.canActivate(localContext as any);
 
     expect(GuardHelpers.addUserToObject).toBeCalledWith(
-      request,
+      request.body,
       UserEntity.create({
         id: 'any_id',
         name: 'any_name',

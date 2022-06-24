@@ -5,8 +5,10 @@ import { GroupRepository, UserRepository } from '@domain/repositories';
 export type GetUserGroupList = {
   userId: string;
 };
-
-export class GetUserGroupListUseCase {
+export abstract class GetUserGroupListUseCaseI {
+  abstract execute({ userId }: GetUserGroupList): Promise<GroupEntity[]>;
+}
+export class GetUserGroupListUseCase implements GetUserGroupListUseCaseI {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly groupRepository: GroupRepository,

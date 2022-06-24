@@ -8,11 +8,26 @@ export class OrmGroupRepositoryAdapter implements GroupRepository {
 
   async findByUser(user: UserEntity): Promise<GroupEntity[]> {
     try {
-      return await this.ormGroupRepository
-        .createQueryBuilder('group')
-        .where(':userId in group.users', { userId: user.id })
+      const { id: userId } = user;
+      const groups = await this.ormGroupRepository
+        .createQueryBuilder('g')
+        .innerJoinAndSelect(
+          'users-group',
+          'user_group',
+          'user_group.user_id = :userId OR g.owner.id = :userId',
+          {
+            userId,
+          },
+        )
+        .setFindOptions({ relations: { owner: true } })
         .getMany();
+      return groups;
+
+      // .andWhere('message.groupId = :groupId', { groupId: group.id })
+      // .leftJoinAndSelect('message.sender', 'user')
+      // .getMany();
     } catch (err) {
+      console.log(err);
       throw new RepositoryError.OperationError();
     }
   }

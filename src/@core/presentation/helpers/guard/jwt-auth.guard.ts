@@ -23,7 +23,7 @@ export class JwtAuthGuard implements CanActivate {
     const session = authorization.split(' ')[1];
     try {
       const user = await this.validateUserUseCase.execute({ session });
-      GuardHelpers.addUserToObject(request, user);
+      GuardHelpers.addUserToObject(request.body, user);
       return !!user;
     } catch (err) {
       if (err instanceof TypeError) {

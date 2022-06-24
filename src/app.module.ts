@@ -8,6 +8,8 @@ import {
   DeleteMessageUseCaseI,
   GetGroupMessageListUseCase,
   GetGroupMessageListUseCaseI,
+  GetUserGroupListUseCase,
+  GetUserGroupListUseCaseI,
   LoginUserUseCase,
   LoginUserUseCaseI,
   RegisterUserUseCase,
@@ -37,6 +39,7 @@ import {
   AddUserToGroupController,
   CreateGroupController,
   GetGroupMessageListController,
+  GetUserGroupListController,
   LoginController,
   SignupController,
 } from '@presentation/controllers';
@@ -218,7 +221,18 @@ import { DataSource } from 'typeorm';
           messageRepository,
         );
       },
+
       inject: [UserRepository, GroupRepository, MessageRepository],
+    },
+    {
+      provide: GetUserGroupListUseCaseI,
+      useFactory: (
+        userRepository: UserRepository,
+        groupRepository: GroupRepository,
+      ) => {
+        return new GetUserGroupListUseCase(userRepository, groupRepository);
+      },
+      inject: [UserRepository, GroupRepository],
     },
     SendMessageGateway,
     DeleteMessageGateway,
@@ -229,6 +243,7 @@ import { DataSource } from 'typeorm';
     CreateGroupController,
     GetGroupMessageListController,
     AddUserToGroupController,
+    GetUserGroupListController,
   ],
 })
 export class AppModule {}

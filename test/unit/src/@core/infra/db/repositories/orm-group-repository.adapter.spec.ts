@@ -22,8 +22,10 @@ describe('OrmGroup Repository Adapter', () => {
     ormGroupRepository.save = jest.fn();
     ormGroupRepository.findOneBy = jest.fn();
     ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-      where: jest.fn().mockReturnValue({
-        getMany: jest.fn(),
+      innerJoinAndSelect: jest.fn().mockReturnValue({
+        setFindOptions: jest.fn().mockReturnValue({
+          getMany: jest.fn(),
+        }),
       }),
     });
   });
@@ -218,13 +220,39 @@ describe('OrmGroup Repository Adapter', () => {
         password: 'any_user_password',
       });
       await sut.findByUser(mockedUser);
-      expect(ormGroupRepository.createQueryBuilder).toBeCalledWith('group');
-      expect(ormGroupRepository.createQueryBuilder('any').where).toBeCalledWith(
-        ':userId in group.users',
-        { userId: 'any_user_id' },
+      expect(ormGroupRepository.createQueryBuilder).toBeCalledWith('g');
+      expect(
+        ormGroupRepository.createQueryBuilder('any').innerJoinAndSelect,
+      ).toBeCalledWith(
+        'users-group',
+        'user_group',
+        'user_group.user_id = :userId OR g.owner.id = :userId',
+        {
+          userId: 'any_user_id',
+        },
       );
       expect(
-        ormGroupRepository.createQueryBuilder('').where('').getMany,
+        ormGroupRepository.createQueryBuilder('').innerJoinAndSelect('', '')
+          .setFindOptions,
+      ).toBeCalledWith({
+        relations: { owner: true },
+      });
+
+      expect(
+        ormGroupRepository.createQueryBuilder('any').innerJoinAndSelect,
+      ).toBeCalledWith(
+        'users-group',
+        'user_group',
+        'user_group.user_id = :userId OR g.owner.id = :userId',
+        {
+          userId: 'any_user_id',
+        },
+      );
+      expect(
+        ormGroupRepository
+          .createQueryBuilder('')
+          .innerJoinAndSelect('', '')
+          .setFindOptions({}).getMany,
       ).toBeCalledTimes(1);
     });
 
@@ -245,8 +273,10 @@ describe('OrmGroup Repository Adapter', () => {
       });
 
       ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-        where: jest.fn().mockReturnValue({
-          getMany: jest.fn().mockResolvedValueOnce([group, group]),
+        innerJoinAndSelect: jest.fn().mockReturnValue({
+          setFindOptions: jest.fn().mockReturnValue({
+            getMany: jest.fn().mockReturnValueOnce([group, group]),
+          }),
         }),
       });
       const result = await sut.findByUser(

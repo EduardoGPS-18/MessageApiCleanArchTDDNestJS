@@ -1,5 +1,9 @@
 import { GroupEntity } from '@domain/entities';
-import { GroupDto, GroupWithoutMessagesDto } from '@presentation/dtos';
+import {
+  GroupDto,
+  GroupLessDto,
+  GroupWithoutMessagesDto,
+} from '@presentation/dtos';
 import { MessageMapper, UserMapper } from '@presentation/mappers';
 
 export class GroupMapper {
@@ -21,6 +25,15 @@ export class GroupMapper {
       description: group.description,
       owner: UserMapper.toLessUserData(group.owner),
       users: group.users.map((user) => UserMapper.toLessUserData(user)),
+    };
+  }
+
+  static toLessDto(group: GroupEntity): GroupLessDto {
+    return {
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      owner: UserMapper.toLessUserData(group.owner),
     };
   }
 }
