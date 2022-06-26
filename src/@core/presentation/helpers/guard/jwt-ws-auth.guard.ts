@@ -7,7 +7,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { GuardHelpers } from '@presentation/helpers/guard';
+import { PresentationHelpers } from '@presentation/helpers/methods';
 import { Socket } from 'socket.io';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class JwtWsAuthGuard implements CanActivate {
     const session = authorization.split(' ')[1];
     try {
       const user = await this.validateUserUseCase.execute({ session });
-      GuardHelpers.addUserToObject(client, user);
+      PresentationHelpers.addUserToObject(client.data, user);
       return !!user;
     } catch (err) {
       if (err instanceof DomainError.InvalidUser) {

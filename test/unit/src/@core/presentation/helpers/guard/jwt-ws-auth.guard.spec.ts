@@ -6,7 +6,8 @@ import {
   ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { GuardHelpers, JwtWsAuthGuard } from '@presentation/helpers/guard';
+import { JwtWsAuthGuard } from '@presentation/helpers/guard';
+import { PresentationHelpers } from '@presentation/helpers/methods';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 let context: ExecutionContext = jest.genMockFromModule('@nestjs/common');
@@ -35,7 +36,7 @@ describe('JwtWsAuthGuard Tests', () => {
         },
       }),
     });
-    GuardHelpers.addUserToObject = jest.fn();
+    PresentationHelpers.addUserToObject = jest.fn();
   });
 
   it('Should call usecase correctly', async () => {
@@ -78,15 +79,15 @@ describe('JwtWsAuthGuard Tests', () => {
     await expect(promise).rejects.toThrowError(InternalServerErrorException);
   });
 
-  it('Should call GuardHelpers.addUserToObject with correct values', async () => {
+  it('Should call PresentationHelpers.addUserToObject with correct values', async () => {
     const validateUserStub = new ValidateUserUseCaseStub();
     const sut = new JwtWsAuthGuard(validateUserStub);
 
     await sut.canActivate(context);
     const client = context.switchToWs().getClient();
 
-    expect(GuardHelpers.addUserToObject).toBeCalledWith(
-      client,
+    expect(PresentationHelpers.addUserToObject).toBeCalledWith(
+      client.data,
       UserEntity.create({
         id: 'any_id',
         name: 'any_name',

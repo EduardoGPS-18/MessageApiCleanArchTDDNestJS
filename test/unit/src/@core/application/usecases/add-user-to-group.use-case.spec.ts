@@ -165,6 +165,17 @@ describe('Add User To Group Suit', () => {
     await expect(promise).rejects.toThrowError(DomainError.InvalidUser);
   });
 
+  it('Should throw DomainError.InvalidUser if adder isnt found ', async () => {
+    const { sut, groupRepositoryStub } = makeSut();
+    jest.spyOn(groupRepositoryStub, 'findById').mockResolvedValueOnce(null);
+    const promise = sut.execute({
+      userId: 'any_user_id',
+      adderId: 'any_not_owner_user_id',
+      groupId: 'any_group_id',
+    });
+    await expect(promise).rejects.toThrowError(DomainError.InvalidGroup);
+  });
+
   it('Should throw DomainError.UserNotFound if user isnt found ', async () => {
     const { sut, userRepositoryStub } = makeSut();
     jest

@@ -1,5 +1,5 @@
 import { UserEntity } from '@domain/entities';
-import { GuardHelpers } from '@presentation/helpers/guard';
+import { PresentationHelpers } from '@presentation/helpers/methods';
 
 const user = UserEntity.create({
   id: 'any_user_id',
@@ -9,11 +9,11 @@ const user = UserEntity.create({
   session: 'any_user_session',
 });
 
-describe('GuardHelpers (suit)', () => {
+describe('PresentationHelpers (suit)', () => {
   describe('AddUserToObject (suit)', () => {
     it('Should add user to request object', () => {
       const object: any = {};
-      GuardHelpers.addUserToObject(object, user);
+      PresentationHelpers.addUserToObject(object, user);
       expect(object.user).toEqual(user);
     });
   });

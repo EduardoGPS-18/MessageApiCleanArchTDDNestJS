@@ -6,7 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { GuardHelpers } from '@presentation/helpers/guard';
+import { PresentationHelpers } from '@presentation/helpers/methods';
 import { Request } from 'express';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class JwtAuthGuard implements CanActivate {
     const session = authorization.split(' ')[1];
     try {
       const user = await this.validateUserUseCase.execute({ session });
-      GuardHelpers.addUserToObject(request.body, user);
+      PresentationHelpers.addUserToObject(request.body, user);
       return !!user;
     } catch (err) {
       if (err instanceof TypeError) {

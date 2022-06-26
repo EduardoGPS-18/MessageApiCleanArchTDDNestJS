@@ -28,7 +28,6 @@ export class OrmGroupRepositoryAdapter implements GroupRepository {
         .getMany();
       return groups;
     } catch (err) {
-      console.log(err);
       throw new RepositoryError.OperationError();
     }
   }

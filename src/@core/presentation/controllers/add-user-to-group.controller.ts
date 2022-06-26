@@ -10,17 +10,17 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { WebSocketServer } from '@nestjs/websockets';
 import { AddUserToGroupDto } from '@presentation/dtos';
 import { GetUserEntity } from '@presentation/helpers/decorators';
 import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupMapper } from '@presentation/mappers';
-import { Server } from 'socket.io';
+import { GroupWebSocketProviderI } from '@presentation/protocols';
 @Controller('group')
 export class AddUserToGroupController {
-  @WebSocketServer()
-  server: Server;
-  constructor(private addUserToGroupUseCase: AddUserToGroupUseCaseI) {}
+  constructor(
+    private addUserToGroupUseCase: AddUserToGroupUseCaseI,
+    private readonly groupWebSocket: GroupWebSocketProviderI,
+  ) {}
 
   @Post('add-user')
   @UseGuards(JwtAuthGuard)
@@ -37,11 +37,13 @@ export class AddUserToGroupController {
         adderId,
         groupId,
       });
+      await this.groupWebSocket.emitToUserAddedToGroup(userId, group);
       return GroupMapper.toDtoWithoutMessages(group);
     } catch (err) {
       if (
         err instanceof DomainError.UserNotFound ||
-        err instanceof DomainError.UserAlreadyInGroup
+        err instanceof DomainError.UserAlreadyInGroup ||
+        err instanceof DomainError.InvalidGroup
       ) {
         throw new BadRequestException();
       } else if (

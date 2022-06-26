@@ -48,6 +48,8 @@ import {
   SendMessageGateway,
 } from '@presentation/gateways';
 import { JwtAuthGuard } from '@presentation/helpers/guard';
+import { GroupWebSocketProviderI } from '@presentation/protocols';
+import { GroupWebSocketProviderGateway } from '@presentation/providers';
 import { DataSource } from 'typeorm';
 
 @Module({
@@ -234,6 +236,11 @@ import { DataSource } from 'typeorm';
       },
       inject: [UserRepository, GroupRepository],
     },
+    {
+      provide: GroupWebSocketProviderI,
+      useExisting: GroupWebSocketProviderGateway,
+    },
+    GroupWebSocketProviderGateway,
     SendMessageGateway,
     DeleteMessageGateway,
   ],

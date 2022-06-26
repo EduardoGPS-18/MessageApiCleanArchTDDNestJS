@@ -51,12 +51,9 @@ export class SendMessageGateway
         groupId,
         senderId,
       });
-      this.server
-        .in(message.group.id)
-        .emit('new-messages', {
-          message: MessageMapper.toMessageOfGroupDto(message),
-        });
-
+      this.server.in(message.group.id).emit('new-messages', {
+        message: MessageMapper.toMessageOfGroupDto(message),
+      });
       return MessageMapper.toDto(message);
     } catch (err) {
       if (

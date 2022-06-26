@@ -2,7 +2,8 @@ import { ValidateUserProps, ValidateUserUseCaseI } from '@application/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { GuardHelpers, JwtAuthGuard } from '@presentation/helpers/guard';
+import { JwtAuthGuard } from '@presentation/helpers/guard';
+import { PresentationHelpers } from '@presentation/helpers/methods';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
@@ -31,7 +32,7 @@ describe('JwtAuthGuard Tests', () => {
         body: {},
       }),
     });
-    GuardHelpers.addUserToObject = jest.fn();
+    PresentationHelpers.addUserToObject = jest.fn();
   });
 
   it('Should call usecase correctly', async () => {
@@ -73,7 +74,7 @@ describe('JwtAuthGuard Tests', () => {
     await expect(promise).rejects.toThrowError(ForbiddenException);
   });
 
-  it('Should call GuardHelpers.addUserToObject with correct values', async () => {
+  it('Should call PresentationHelpers.addUserToObject with correct values', async () => {
     const validateUserStub = new ValidateUserUseCaseStub();
 
     const localContext = {
@@ -91,7 +92,7 @@ describe('JwtAuthGuard Tests', () => {
 
     await sut.canActivate(localContext as any);
 
-    expect(GuardHelpers.addUserToObject).toBeCalledWith(
+    expect(PresentationHelpers.addUserToObject).toBeCalledWith(
       request.body,
       UserEntity.create({
         id: 'any_id',
