@@ -13,10 +13,14 @@ import { CreateGroupDto, GroupDto } from '@presentation/dtos';
 import { GetUserEntity } from '@presentation/helpers/decorators';
 import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupMapper } from '@presentation/mappers';
+import { GroupWebSocketProviderI } from '@presentation/protocols';
 
 @Controller('group')
 export class CreateGroupController {
-  constructor(private readonly createGroupUseCase: CreateGroupUseCaseI) {}
+  constructor(
+    private readonly createGroupUseCase: CreateGroupUseCaseI,
+    private readonly groupWebSocket: GroupWebSocketProviderI,
+  ) {}
 
   @Post('create')
   @UseGuards(JwtAuthGuard)
@@ -32,6 +36,9 @@ export class CreateGroupController {
         ownerId,
         usersIds,
         description,
+      });
+      usersIds.map((userId) => {
+        this.groupWebSocket.emitToUserAddedToGroup(userId, group);
       });
       return GroupMapper.toDto(group);
     } catch (err) {
