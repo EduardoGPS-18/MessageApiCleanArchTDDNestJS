@@ -22,9 +22,11 @@ describe('OrmGroup Repository Adapter', () => {
     ormGroupRepository.save = jest.fn();
     ormGroupRepository.findOneBy = jest.fn();
     ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-      innerJoinAndSelect: jest.fn().mockReturnValue({
-        setFindOptions: jest.fn().mockReturnValue({
-          getMany: jest.fn(),
+      innerJoin: jest.fn().mockReturnValue({
+        innerJoinAndMapOne: jest.fn().mockReturnValue({
+          innerJoin: jest.fn().mockReturnValue({
+            getMany: jest.fn(),
+          }),
         }),
       }),
     });
@@ -220,30 +222,28 @@ describe('OrmGroup Repository Adapter', () => {
         password: 'any_user_password',
       });
       await sut.findByUser(mockedUser);
-      expect(ormGroupRepository.createQueryBuilder).toBeCalledWith('g');
+      expect(ormGroupRepository.createQueryBuilder).toBeCalledWith('group');
       expect(
-        ormGroupRepository.createQueryBuilder('any').innerJoinAndSelect,
+        ormGroupRepository.createQueryBuilder('').innerJoin,
       ).toBeCalledWith(
         'users-group',
-        'user_group',
-        'user_group.user_id = :userId OR g.owner.id = :userId',
-        {
-          userId: 'any_user_id',
-        },
+        'user-group',
+        'user-group.group_id = group.id',
       );
       expect(
-        ormGroupRepository.createQueryBuilder('').innerJoinAndSelect('', '')
-          .setFindOptions,
-      ).toBeCalledWith({
-        relations: { owner: true },
-      });
+        ormGroupRepository.createQueryBuilder('').innerJoin('', '')
+          .innerJoinAndMapOne,
+      ).toBeCalledWith('group.owner', 'user', 'u', 'u.id = group.owner.id');
 
       expect(
-        ormGroupRepository.createQueryBuilder('any').innerJoinAndSelect,
+        ormGroupRepository
+          .createQueryBuilder('')
+          .innerJoin('', '')
+          .innerJoinAndMapOne('', '', '').innerJoin,
       ).toBeCalledWith(
-        'users-group',
-        'user_group',
-        'user_group.user_id = :userId OR g.owner.id = :userId',
+        'user',
+        'user',
+        'user-group.user_id = :userId OR group.owner.id = :userId',
         {
           userId: 'any_user_id',
         },
@@ -251,8 +251,9 @@ describe('OrmGroup Repository Adapter', () => {
       expect(
         ormGroupRepository
           .createQueryBuilder('')
-          .innerJoinAndSelect('', '')
-          .setFindOptions({}).getMany,
+          .innerJoin('', '')
+          .innerJoinAndMapOne('', '', '')
+          .innerJoin('', '').getMany,
       ).toBeCalledTimes(1);
     });
 
@@ -273,9 +274,11 @@ describe('OrmGroup Repository Adapter', () => {
       });
 
       ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-        innerJoinAndSelect: jest.fn().mockReturnValue({
-          setFindOptions: jest.fn().mockReturnValue({
-            getMany: jest.fn().mockReturnValueOnce([group, group]),
+        innerJoin: jest.fn().mockReturnValue({
+          innerJoinAndMapOne: jest.fn().mockReturnValue({
+            innerJoin: jest.fn().mockReturnValue({
+              getMany: jest.fn().mockResolvedValueOnce([group, group]),
+            }),
           }),
         }),
       });
