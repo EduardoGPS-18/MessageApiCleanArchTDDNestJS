@@ -8,7 +8,6 @@ export class OrmGroupRepositoryAdapter implements GroupRepository {
 
   async findByUser(user: UserEntity): Promise<GroupEntity[]> {
     try {
-      //TODO: FIX IT
       const { id: userId } = user;
       const groups = await this.ormGroupRepository
         .createQueryBuilder('group')

@@ -50,9 +50,9 @@ export class GroupEntity {
   }
 
   addUserListOnGroup(users: UserEntity[]) {
-    users.map((user) => {
-      if (!this.users.includes(user)) {
-        this.users.push(user);
+    users.map((userToAdd) => {
+      if (!this.users.map((user) => user.id).includes(userToAdd.id)) {
+        this.users.push(userToAdd);
       }
     });
   }

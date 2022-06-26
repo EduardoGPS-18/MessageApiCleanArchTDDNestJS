@@ -35,72 +35,180 @@ describe('Group entity', () => {
     });
   });
 
-  it('Should add user correct on group', () => {
-    const group = GroupEntity.create({
-      id: 'any_id',
-      name: 'any_name',
-      description: 'any_description',
-      messages: [],
-      owner: UserEntity.create({
-        id: 'any_user_id',
-        email: 'any_user_email',
-        name: 'any_user_name',
-        password: 'any_user_password',
-        session: 'any_user_session',
-      }),
-      users: [],
+  describe('addUserListOnGroup', () => {
+    it('Should add user correct on group', () => {
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: UserEntity.create({
+          id: 'any_user_id',
+          email: 'any_user_email',
+          name: 'any_user_name',
+          password: 'any_user_password',
+          session: 'any_user_session',
+        }),
+        users: [],
+      });
+      group.addUserListOnGroup([
+        UserEntity.create({
+          id: 'added_user_id',
+          email: 'added_user_email',
+          name: 'added_user_name',
+          password: 'added_user_password',
+          session: 'added_user_session',
+        }),
+      ]);
+      expect(group.users).toMatchObject([
+        UserEntity.create({
+          id: 'added_user_id',
+          email: 'added_user_email',
+          name: 'added_user_name',
+          password: 'added_user_password',
+          session: 'added_user_session',
+        }),
+      ]);
     });
-    group.addUserListOnGroup([
-      UserEntity.create({
-        id: 'added_user_id',
-        email: 'added_user_email',
-        name: 'added_user_name',
-        password: 'added_user_password',
-        session: 'added_user_session',
-      }),
-    ]);
-    expect(group.users).toMatchObject([
-      UserEntity.create({
-        id: 'added_user_id',
-        email: 'added_user_email',
-        name: 'added_user_name',
-        password: 'added_user_password',
-        session: 'added_user_session',
-      }),
-    ]);
-  });
 
-  it('Shouldnt add duplicated user on group', () => {
-    const group = GroupEntity.create({
-      id: 'any_id',
-      name: 'any_name',
-      description: 'any_description',
-      messages: [],
-      owner: UserEntity.create({
-        id: 'any_user_id',
-        email: 'any_user_email',
-        name: 'any_user_name',
-        password: 'any_user_password',
-        session: 'any_user_session',
-      }),
-      users: [],
+    it('Shouldnt add duplicated user on group', () => {
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: UserEntity.create({
+          id: 'any_user_id',
+          email: 'any_user_email',
+          name: 'any_user_name',
+          password: 'any_user_password',
+          session: 'any_user_session',
+        }),
+        users: [],
+      });
+      const userToAdd = UserEntity.create({
+        id: 'added_user_id_2',
+        email: 'added_user_email_2',
+        name: 'added_user_name_2',
+        password: 'added_user_password_2',
+        session: 'added_user_session_2',
+      });
+      const anotherUser = UserEntity.create({
+        id: 'added_user_id',
+        email: 'added_user_email',
+        name: 'added_user_name',
+        password: 'added_user_password',
+        session: 'added_user_session',
+      });
+      group.addUserListOnGroup([userToAdd, userToAdd, anotherUser]);
+      expect(group.users).toMatchObject([userToAdd, anotherUser]);
     });
-    const userToAdd = UserEntity.create({
-      id: 'added_user_id_2',
-      email: 'added_user_email_2',
-      name: 'added_user_name_2',
-      password: 'added_user_password_2',
-      session: 'added_user_session_2',
+
+    it('Should add a list of user on group', () => {
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: UserEntity.create({
+          id: 'any_user_id',
+          email: 'any_user_email',
+          name: 'any_user_name',
+          password: 'any_user_password',
+          session: 'any_user_session',
+        }),
+        users: [],
+      });
+      group.addUserListOnGroup([
+        UserEntity.create({
+          id: 'added_user_id',
+          email: 'added_user_email',
+          name: 'added_user_name',
+          password: 'added_user_password',
+          session: 'added_user_session',
+        }),
+        UserEntity.create({
+          id: 'added_user_id_2',
+          email: 'added_user_email_2',
+          name: 'added_user_name_2',
+          password: 'added_user_password_2',
+          session: 'added_user_session_2',
+        }),
+      ]);
+      expect(group.users).toMatchObject([
+        UserEntity.create({
+          id: 'added_user_id',
+          email: 'added_user_email',
+          name: 'added_user_name',
+          password: 'added_user_password',
+          session: 'added_user_session',
+        }),
+        UserEntity.create({
+          id: 'added_user_id_2',
+          email: 'added_user_email_2',
+          name: 'added_user_name_2',
+          password: 'added_user_password_2',
+          session: 'added_user_session_2',
+        }),
+      ]);
     });
-    const anotherUser = UserEntity.create({
-      id: 'added_user_id',
-      email: 'added_user_email',
-      name: 'added_user_name',
-      password: 'added_user_password',
-      session: 'added_user_session',
+
+    it('Should add a list of user on group', () => {
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: UserEntity.create({
+          id: 'any_user_id',
+          email: 'any_user_email',
+          name: 'any_user_name',
+          password: 'any_user_password',
+          session: 'any_user_session',
+        }),
+        users: [
+          UserEntity.create({
+            id: 'added_user_id',
+            email: 'added_user_email',
+            name: 'added_user_name',
+            password: 'added_user_password',
+            session: 'added_user_session',
+          }),
+        ],
+      });
+      group.addUserListOnGroup([
+        UserEntity.create({
+          id: 'added_user_id',
+          email: 'added_user_email',
+          name: 'added_user_name',
+          password: 'added_user_password',
+          session: 'added_user_session',
+        }),
+        UserEntity.create({
+          id: 'added_user_id_2',
+          email: 'added_user_email_2',
+          name: 'added_user_name_2',
+          password: 'added_user_password_2',
+          session: 'added_user_session_2',
+        }),
+      ]);
+      expect(group.users).toMatchObject([
+        UserEntity.create({
+          id: 'added_user_id',
+          email: 'added_user_email',
+          name: 'added_user_name',
+          password: 'added_user_password',
+          session: 'added_user_session',
+        }),
+        UserEntity.create({
+          id: 'added_user_id_2',
+          email: 'added_user_email_2',
+          name: 'added_user_name_2',
+          password: 'added_user_password_2',
+          session: 'added_user_session_2',
+        }),
+      ]);
     });
-    group.addUserListOnGroup([userToAdd, userToAdd, anotherUser]);
-    expect(group.users).toMatchObject([userToAdd, anotherUser]);
   });
 
   describe('is user is in group', () => {

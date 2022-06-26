@@ -10,15 +10,16 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { WebSocketServer } from '@nestjs/websockets';
 import { AddUserToGroupDto } from '@presentation/dtos';
 import { GetUserEntity } from '@presentation/helpers/decorators';
 import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupMapper } from '@presentation/mappers';
-
-//TODO: CHANGE THIS ROUTE TO WS
-
+import { Server } from 'socket.io';
 @Controller('group')
 export class AddUserToGroupController {
+  @WebSocketServer()
+  server: Server;
   constructor(private addUserToGroupUseCase: AddUserToGroupUseCaseI) {}
 
   @Post('add-user')
