@@ -44,7 +44,7 @@ const makeSut = (): SutTypes => {
   return { sut, groupRepository, userRepository };
 };
 
-describe('GetUserGroupList || UseCase || SUIT', () => {
+describe('GetUserGroupList || UseCase || Suit', () => {
   it('Should call dependencies correctly', async () => {
     const { sut, userRepository, groupRepository } = makeSut();
 

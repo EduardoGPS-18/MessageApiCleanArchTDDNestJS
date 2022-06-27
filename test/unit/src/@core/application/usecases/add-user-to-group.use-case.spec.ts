@@ -54,7 +54,7 @@ const makeSut = (): SutTypes => {
   return { sut, groupRepository, userRepository };
 };
 
-describe('Add User To Group Suit', () => {
+describe('AddUserToGroup || UseCase || Suit', () => {
   beforeEach(() => {
     mockedGroup.users = [];
   });

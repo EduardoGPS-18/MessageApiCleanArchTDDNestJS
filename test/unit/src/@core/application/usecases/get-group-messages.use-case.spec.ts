@@ -87,7 +87,7 @@ const makeSut = (): SutTypes => {
   return { sut, messageRepository, groupRepository, userRepository };
 };
 
-describe('Get Group Messages', () => {
+describe('GetGroupMessages || UseCase || Suit', () => {
   it('Should call correctly dependencies', async () => {
     const { sut, groupRepository, messageRepository } = makeSut();
 

@@ -83,7 +83,7 @@ const makeSut = (): SutTypes => {
   };
 };
 
-describe('Delete message of group suit', () => {
+describe('DeleteMessageOfGroup || UseCase || Suit', () => {
   it('Should call dependencies correctly', async () => {
     const { sut, userRepository, groupRepository, messageRepository } =
       makeSut();

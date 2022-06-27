@@ -59,7 +59,7 @@ const makeSut = (): SutTypes => {
   return { sut, messageRepository, userRepository };
 };
 
-describe('EditMessage UseCase (SUIT)', () => {
+describe('EditMessage || UseCase || Suit', () => {
   it('Should call repository correctly', async () => {
     const { sut, userRepository, messageRepository } = makeSut();
     const newMessageContent = 'any_new_message_content';

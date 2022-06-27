@@ -41,7 +41,7 @@ const makeSut = (): SutTypes => {
   return { sut, hasher, userRepository, sessionHandler };
 };
 
-describe('AddUser Use Case', () => {
+describe('RegisterUser || UseCase || Suit', () => {
   it('Should call dependencies with correct values', async () => {
     const { sut, hasher, userRepository, sessionHandler } = makeSut();
 
