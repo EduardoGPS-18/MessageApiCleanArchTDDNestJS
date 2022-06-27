@@ -1,81 +1,81 @@
-import { EditMessageProps, EditMessageUseCaseI } from '@application/usecases';
+import { EditMessageUseCaseStub } from '@application-unit/mocks/usecases';
 import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
+import { EditMessageDto } from '@presentation/dtos';
 import { EditMessageGateway } from '@presentation/gateways';
 import { Socket } from 'socket.io';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-class EditMessageUseCaseStub implements EditMessageUseCaseI {
-  execute(props: EditMessageProps): Promise<MessageEntity> {
-    return Promise.resolve(
-      MessageEntity.create({
-        content: 'update_message',
-        id: 'any_message_id',
-        sender: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        group: GroupEntity.create({
-          id: 'any_group_id',
-          description: 'any_group_description',
-          messages: [],
-          name: 'any_group_name',
-          owner: UserEntity.create({
-            id: 'any_user_id',
-            email: 'any_user_email',
-            name: 'any_user_name',
-            password: 'any_user_password',
-          }),
-          users: [],
-        }),
-      }),
-    );
-  }
-}
+const mockedUser = UserEntity.create({
+  id: 'any_user_id',
+  email: 'any_user_email',
+  name: 'any_user_name',
+  password: 'any_user_password',
+});
+
+const mockedGroup = GroupEntity.create({
+  id: 'any_group_id',
+  description: 'any_group_description',
+  messages: [],
+  name: 'any_group_name',
+  owner: mockedUser,
+  users: [],
+});
+
+const mockedMessage = MessageEntity.create({
+  content: 'update_message',
+  id: 'any_message_id',
+  sender: mockedUser,
+  group: mockedGroup,
+});
+
+const currentUserClient: Socket = {
+  emit: jest.fn(),
+} as any;
+
+const currentUserEntity: UserEntity = UserEntity.create({
+  id: 'any_user_id',
+  email: 'any_user_email',
+  name: 'any_user_name',
+  password: 'any_user_password',
+});
+
+const mockedEditMessageDto: EditMessageDto = {
+  newMessageContent: 'new_message_content',
+  groupId: 'any_group_id',
+  messageId: 'any_message_id',
+};
 
 type SutTypes = {
-  currentUserClient: Socket;
-  currentUserEntity: UserEntity;
-  editMessageUseCase: EditMessageUseCaseStub;
   sut: EditMessageGateway;
+  editMessageUseCase: EditMessageUseCaseStub;
 };
 const makeSut = (): SutTypes => {
   const editMessageUseCase = new EditMessageUseCaseStub();
   const sut = new EditMessageGateway(editMessageUseCase);
+
+  editMessageUseCase.execute = jest.fn().mockResolvedValue(mockedMessage);
+
   sut.server = {
     in: jest.fn().mockReturnValue({
       emit: jest.fn(),
     }),
   } as any;
-  const currentUserClient: Socket = {
-    emit: jest.fn(),
-  } as any;
-  const currentUserEntity: UserEntity = UserEntity.create({
-    id: 'any_user_id',
-    email: 'any_user_email',
-    name: 'any_user_name',
-    password: 'any_user_password',
-  });
-  return { sut, editMessageUseCase, currentUserClient, currentUserEntity };
+
+  return { sut, editMessageUseCase };
 };
 
-describe('EditMessage || Gateway || SUIT', () => {
+describe('EditMessage || Gateway || Suit', () => {
   it('Should call usecase correctly', async () => {
-    const { sut, editMessageUseCase, currentUserClient, currentUserEntity } =
-      makeSut();
-    jest.spyOn(editMessageUseCase, 'execute');
+    const { sut, editMessageUseCase } = makeSut();
+
     await sut.handle(
-      {
-        groupId: 'any_group_id',
-        newMessageContent: 'new_message_content',
-        messageId: 'any_message_id',
-      },
+      mockedEditMessageDto,
       currentUserEntity,
       currentUserClient as any,
     );
+
     expect(editMessageUseCase.execute).toBeCalledWith({
       messageId: 'any_message_id',
       newMessageContent: 'new_message_content',
@@ -84,19 +84,13 @@ describe('EditMessage || Gateway || SUIT', () => {
   });
 
   it('Should emit error with text Unauthorized to client when usecase throws CurrentUserIsntMessageOwner', async () => {
-    const { sut, editMessageUseCase, currentUserClient, currentUserEntity } =
-      makeSut();
-
+    const { sut, editMessageUseCase } = makeSut();
     jest
       .spyOn(editMessageUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.CurrentUserIsntMessageOwner());
 
     await sut.handle(
-      {
-        groupId: 'any_group_id',
-        newMessageContent: 'new_message_content',
-        messageId: 'any_message_id',
-      },
+      mockedEditMessageDto,
       currentUserEntity,
       currentUserClient as any,
     );
@@ -108,19 +102,13 @@ describe('EditMessage || Gateway || SUIT', () => {
   });
 
   it('Should emit error with text Server error to client when usecase throws Unexpected', async () => {
-    const { sut, editMessageUseCase, currentUserClient, currentUserEntity } =
-      makeSut();
-
+    const { sut, editMessageUseCase } = makeSut();
     jest
       .spyOn(editMessageUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.Unexpected());
 
     await sut.handle(
-      {
-        groupId: 'any_group_id',
-        newMessageContent: 'new_message_content',
-        messageId: 'any_message_id',
-      },
+      mockedEditMessageDto,
       currentUserEntity,
       currentUserClient as any,
     );
@@ -131,18 +119,14 @@ describe('EditMessage || Gateway || SUIT', () => {
   });
 
   it('Should emit to room new message on success ', async () => {
-    const { sut, editMessageUseCase, currentUserClient, currentUserEntity } =
-      makeSut();
+    const { sut } = makeSut();
 
     await sut.handle(
-      {
-        newMessageContent: 'new_message_content',
-        groupId: 'any_group_id',
-        messageId: 'any_message_id',
-      },
+      mockedEditMessageDto,
       currentUserEntity,
       currentUserClient as any,
     );
+
     expect(sut.server.in).toBeCalledWith('any_group_id');
     expect(sut.server.in('any').emit).toBeCalledWith('updated_message', {
       message: {

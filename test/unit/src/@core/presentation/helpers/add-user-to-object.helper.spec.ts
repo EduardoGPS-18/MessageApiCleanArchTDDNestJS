@@ -9,8 +9,8 @@ const user = UserEntity.create({
   session: 'any_user_session',
 });
 
-describe('PresentationHelpers (suit)', () => {
-  describe('AddUserToObject (suit)', () => {
+describe('PresentationHelpers (Suit)', () => {
+  describe('AddUserToObject (Suit)', () => {
     it('Should add user to request object', () => {
       const object: any = {};
       PresentationHelpers.addUserToObject(object, user);

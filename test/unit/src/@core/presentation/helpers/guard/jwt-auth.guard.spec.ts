@@ -1,4 +1,4 @@
-import { ValidateUserProps, ValidateUserUseCaseI } from '@application/usecases';
+import { ValidateUserUseCaseStub } from '@application-unit/mocks/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
@@ -9,53 +9,54 @@ jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
 let context: ExecutionContext = jest.genMockFromModule('@nestjs/common');
 
-class ValidateUserUseCaseStub implements ValidateUserUseCaseI {
-  execute({ session }: ValidateUserProps): Promise<UserEntity> {
-    return Promise.resolve(
-      UserEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        email: 'any_email',
-        password: 'any_password',
-      }),
-    );
-  }
-}
+const mockedUser = UserEntity.create({
+  id: 'any_id',
+  name: 'any_name',
+  email: 'any_email',
+  password: 'any_password',
+});
 
-describe('JwtAuthGuard Tests', () => {
-  beforeEach(() => {
-    context.switchToHttp = (): any => ({
-      getRequest: () => ({
-        headers: {
-          authorization: 'Bearer any-token',
-        },
-        body: {},
-      }),
-    });
-    PresentationHelpers.addUserToObject = jest.fn();
+type SutTypes = {
+  validateUser: ValidateUserUseCaseStub;
+  sut: JwtAuthGuard;
+};
+const makeSut = (): SutTypes => {
+  const validateUser = new ValidateUserUseCaseStub();
+  const sut = new JwtAuthGuard(validateUser);
+
+  PresentationHelpers.addUserToObject = jest.fn();
+  validateUser.execute = jest.fn().mockResolvedValue(mockedUser);
+  context.switchToHttp = (): any => ({
+    getRequest: () => ({
+      headers: {
+        authorization: 'Bearer any-token',
+      },
+      body: {},
+    }),
   });
 
+  return { sut, validateUser };
+};
+
+describe('JwtAuth || Guard || Suit', () => {
   it('Should call usecase correctly', async () => {
-    const validateUserStub = new ValidateUserUseCaseStub();
-    jest.spyOn(validateUserStub, 'execute');
-    const sut = new JwtAuthGuard(validateUserStub);
+    const { sut, validateUser } = makeSut();
 
     await sut.canActivate(context);
 
-    expect(validateUserStub.execute).toHaveBeenCalledWith({
+    expect(validateUser.execute).toHaveBeenCalledWith({
       session: 'any-token',
     });
   });
 
   it('Should throw Forbidden if token isnt provided', async () => {
+    const { sut } = makeSut();
     context.switchToHttp = jest.fn().mockReturnValueOnce({
       getRequest: () => ({
         headers: {},
         body: {},
       }),
     });
-    const validateUserStub = new ValidateUserUseCaseStub();
-    const sut = new JwtAuthGuard(validateUserStub);
 
     const promise = sut.canActivate(context);
 
@@ -63,11 +64,10 @@ describe('JwtAuthGuard Tests', () => {
   });
 
   it('Should throw Forbidden if ValidateUser throws', async () => {
-    const validateUserStub = new ValidateUserUseCaseStub();
+    const { sut, validateUser } = makeSut();
     jest
-      .spyOn(validateUserStub, 'execute')
+      .spyOn(validateUser, 'execute')
       .mockRejectedValueOnce(new DomainError.InvalidUser());
-    const sut = new JwtAuthGuard(validateUserStub);
 
     const promise = sut.canActivate(context);
 
@@ -75,39 +75,22 @@ describe('JwtAuthGuard Tests', () => {
   });
 
   it('Should call PresentationHelpers.addUserToObject with correct values', async () => {
-    const validateUserStub = new ValidateUserUseCaseStub();
+    const { sut } = makeSut();
+    const request = context.switchToHttp().getRequest();
 
-    const localContext = {
-      switchToHttp: () => ({
-        getRequest: () => ({
-          headers: {
-            authorization: 'Bearer any-token',
-          },
-          body: {},
-        }),
-      }),
-    };
-    const request = localContext.switchToHttp().getRequest();
-    const sut = new JwtAuthGuard(validateUserStub);
-
-    await sut.canActivate(localContext as any);
+    await sut.canActivate(context as any);
 
     expect(PresentationHelpers.addUserToObject).toBeCalledWith(
       request.body,
-      UserEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        email: 'any_email',
-        password: 'any_password',
-      }),
+      mockedUser,
     );
   });
 
   it('Should return true on validation succeed', async () => {
-    const validateUserStub = new ValidateUserUseCaseStub();
-    const sut = new JwtAuthGuard(validateUserStub);
+    const { sut } = makeSut();
 
     const result = await sut.canActivate(context);
+
     expect(result).toBe(true);
   });
 });

@@ -1,7 +1,4 @@
-import {
-  GetUserGroupList,
-  GetUserGroupListUseCaseI,
-} from '@application/usecases';
+import { GetUserGroupListUseCaseStub } from '@application-unit/mocks/usecases';
 import { GroupEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import {
@@ -26,11 +23,6 @@ const mockedGroup = GroupEntity.create({
   users: [],
 });
 
-class GetUserGroupListUseCaseStub implements GetUserGroupListUseCaseI {
-  async execute({ userId }: GetUserGroupList): Promise<GroupEntity[]> {
-    return [mockedGroup, mockedGroup];
-  }
-}
 type SutTypes = {
   getUserGroupListStub: GetUserGroupListUseCaseStub;
   sut: GetUserGroupListController;
@@ -38,13 +30,17 @@ type SutTypes = {
 const makeSut = (): SutTypes => {
   const getUserGroupListStub = new GetUserGroupListUseCaseStub();
   const sut = new GetUserGroupListController(getUserGroupListStub);
+
+  getUserGroupListStub.execute = jest
+    .fn()
+    .mockResolvedValue([mockedGroup, mockedGroup]);
+
   return { sut, getUserGroupListStub };
 };
 
-describe('GetUserGroupList || Controller || SUIT', () => {
+describe('GetUserGroupList || Controller || Suit', () => {
   it('Should call usecase correctly', async () => {
     const { sut, getUserGroupListStub } = makeSut();
-    jest.spyOn(getUserGroupListStub, 'execute');
 
     await sut.handle(mockedOwner);
 
@@ -60,7 +56,6 @@ describe('GetUserGroupList || Controller || SUIT', () => {
 
     const promise = sut.handle(mockedOwner);
 
-    const { id: userId } = mockedOwner;
     await expect(promise).rejects.toThrow(ForbiddenException);
   });
 
@@ -72,7 +67,6 @@ describe('GetUserGroupList || Controller || SUIT', () => {
 
     const promise = sut.handle(mockedOwner);
 
-    const { id: userId } = mockedOwner;
     await expect(promise).rejects.toThrow(InternalServerErrorException);
   });
 

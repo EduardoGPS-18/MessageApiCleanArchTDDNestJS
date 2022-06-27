@@ -2,6 +2,8 @@ import { JwtSessionHandlerAdapter } from '@infra/adapters';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
+const payloadMock = { id: 'any_id', email: 'any_email' };
+
 type SutTypes = {
   sut: JwtSessionHandlerAdapter;
   configService: ConfigService;
@@ -14,15 +16,15 @@ const makeSut = (): SutTypes => {
   return { sut, configService, jwtService };
 };
 
-describe('Jwt Session adapter', () => {
+describe('JwtSession || Adapter || Suit', () => {
   describe('Generate session', () => {
     it('Should call correct dependencies', () => {
       const { sut, jwtService, configService } = makeSut();
       jest.spyOn(jwtService, 'sign');
       jest.spyOn(configService, 'get').mockReturnValueOnce('any_key');
 
-      const payloadMock = { id: 'any_id', email: 'any_email' };
       sut.generateSession(payloadMock);
+
       expect(configService.get).toHaveBeenCalledWith('JWT_SECRET');
       expect(jwtService.sign).toHaveBeenCalledWith(payloadMock, {
         expiresIn: '10 d',
@@ -34,7 +36,6 @@ describe('Jwt Session adapter', () => {
       const { sut, jwtService } = makeSut();
       jest.spyOn(jwtService, 'sign').mockReturnValueOnce('any_token');
 
-      const payloadMock = { id: 'any_id', email: 'any_email' };
       const token = sut.generateSession(payloadMock);
 
       expect(token).toBe('any_token');
@@ -50,20 +51,19 @@ describe('Jwt Session adapter', () => {
       });
       jest.spyOn(configService, 'get').mockReturnValueOnce('any_key');
 
-      const payloadMock = { id: 'any_id', email: 'any_email' };
       sut.verifySession('any_session');
+
       expect(configService.get).toHaveBeenCalledWith('JWT_SECRET');
       expect(jwtService.verify).toHaveBeenCalledWith('any_session', 'any_key');
     });
 
     it('Should return same of jwtService', () => {
       const { sut, jwtService } = makeSut();
-      const mockPayload = { id: 'any_id', email: 'any_email' };
-      jest.spyOn(jwtService, 'verify').mockReturnValueOnce(mockPayload);
+      jest.spyOn(jwtService, 'verify').mockReturnValueOnce(payloadMock);
 
       const payload = sut.verifySession('any_session');
 
-      expect(payload).toBe(mockPayload);
+      expect(payload).toBe(payloadMock);
     });
   });
 });

@@ -49,7 +49,7 @@ const makeSut = () => {
   return { sut, validateUser, currentUserClient };
 };
 
-describe('GroupWebSocketProvider || Gateway || SUIT', () => {
+describe('GroupWebSocketProvider || Gateway || Suit', () => {
   describe('handleConnection', () => {
     it('Should call correctly usecase on connect on socket', async () => {
       const { currentUserClient, sut, validateUser } = makeSut();

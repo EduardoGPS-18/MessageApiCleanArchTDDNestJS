@@ -6,6 +6,34 @@ import { Repository } from 'typeorm';
 
 let repository: Repository<GroupEntity> = jest.genMockFromModule('typeorm');
 
+const mockedUser = UserEntity.create({
+  id: 'any_user_id',
+  email: 'any_user_email',
+  name: 'any_user_name',
+  password: 'any_user_password',
+});
+
+const anotherMockedUser = UserEntity.create({
+  id: 'another_user_id',
+  email: 'another_user_email',
+  name: 'another_user_name',
+  password: 'another_user_password',
+});
+
+const mockedGroup = GroupEntity.create({
+  id: 'any_id',
+  name: 'any_name',
+  description: 'any_description',
+  messages: [],
+  owner: UserEntity.create({
+    id: 'any_user_id',
+    email: 'any_user_email',
+    name: 'any_user_name',
+    password: 'any_user_password',
+  }),
+  users: [],
+});
+
 type SutTypes = {
   sut: OrmGroupRepositoryAdapter;
   ormGroupRepository: Repository<GroupEntity>;
@@ -13,69 +41,43 @@ type SutTypes = {
 const makeSut = (): SutTypes => {
   const ormGroupRepository = repository;
   const sut = new OrmGroupRepositoryAdapter(ormGroupRepository);
+
+  ormGroupRepository.save = jest.fn();
+  ormGroupRepository.findOneBy = jest.fn();
+  ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
+    innerJoin: jest.fn().mockReturnValue({
+      innerJoinAndMapOne: jest.fn().mockReturnValue({
+        innerJoin: jest.fn().mockReturnValue({
+          getMany: jest.fn(),
+        }),
+      }),
+    }),
+  });
+
   return { sut, ormGroupRepository };
 };
 
-describe('OrmGroup Repository Adapter', () => {
-  beforeEach(() => {
-    const { ormGroupRepository } = makeSut();
-    ormGroupRepository.save = jest.fn();
-    ormGroupRepository.findOneBy = jest.fn();
-    ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-      innerJoin: jest.fn().mockReturnValue({
-        innerJoinAndMapOne: jest.fn().mockReturnValue({
-          innerJoin: jest.fn().mockReturnValue({
-            getMany: jest.fn(),
-          }),
-        }),
-      }),
-    });
-  });
-
+describe('OrmGroup || RepositoryAdapter || Suit', () => {
   describe('Insert', () => {
     it('Should call dependencies correctly', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest
         .spyOn(ormGroupRepository, 'save')
         .mockImplementationOnce(async () => {
-          return group;
+          return mockedGroup;
         });
-      await sut.insert(group);
-      expect(ormGroupRepository.save).toHaveBeenCalledWith(group);
+
+      await sut.insert(mockedGroup);
+
+      expect(ormGroupRepository.save).toHaveBeenCalledWith(mockedGroup);
     });
 
     it('Should throw RepositoryError.OperationError if RepositoryError', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest.spyOn(ormGroupRepository, 'save').mockRejectedValueOnce(new Error());
-      const promise = sut.insert(group);
+
+      const promise = sut.insert(mockedGroup);
+
       await expect(promise).rejects.toThrowError(
         RepositoryError.OperationError,
       );
@@ -85,47 +87,23 @@ describe('OrmGroup Repository Adapter', () => {
   describe('Update', () => {
     it('Should call dependencies correctly', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest
         .spyOn(ormGroupRepository, 'save')
         .mockImplementationOnce(async () => {
-          return group;
+          return mockedGroup;
         });
-      await sut.update(group);
-      expect(ormGroupRepository.save).toHaveBeenCalledWith(group);
+
+      await sut.update(mockedGroup);
+
+      expect(ormGroupRepository.save).toHaveBeenCalledWith(mockedGroup);
     });
 
     it('Should throw RepositoryError.OperationError if RepositoryError', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest.spyOn(ormGroupRepository, 'save').mockRejectedValueOnce(new Error());
-      const promise = sut.update(group);
+
+      const promise = sut.update(mockedGroup);
+
       await expect(promise).rejects.toThrowError(
         RepositoryError.OperationError,
       );
@@ -135,26 +113,14 @@ describe('OrmGroup Repository Adapter', () => {
   describe('FindById', () => {
     it('Should call dependencies correctly', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest
         .spyOn(ormGroupRepository, 'findOneBy')
         .mockImplementationOnce(async () => {
-          return group;
+          return mockedGroup;
         });
+
       await sut.findById('any_id');
+
       expect(ormGroupRepository.findOneBy).toHaveBeenCalledWith({
         id: 'any_id',
       });
@@ -162,49 +128,25 @@ describe('OrmGroup Repository Adapter', () => {
 
     it('Should return same of orm', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest
         .spyOn(ormGroupRepository, 'findOneBy')
         .mockImplementationOnce(async () => {
-          return group;
+          return mockedGroup;
         });
+
       const result = await sut.findById('any_id');
-      expect(result).toEqual(group);
+
+      expect(result).toEqual(mockedGroup);
     });
 
     it('Should throw RepositoryError.OperationError if RepositoryError', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest
         .spyOn(ormGroupRepository, 'findOneBy')
         .mockRejectedValueOnce(new Error());
+
       const promise = sut.findById('any_id');
+
       await expect(promise).rejects.toThrowError(
         RepositoryError.OperationError,
       );
@@ -215,13 +157,8 @@ describe('OrmGroup Repository Adapter', () => {
     it('Should call dependencies correctly', async () => {
       const { sut, ormGroupRepository } = makeSut();
 
-      const mockedUser = UserEntity.create({
-        id: 'any_user_id',
-        email: 'any_user_email',
-        name: 'any_user_name',
-        password: 'any_user_password',
-      });
       await sut.findByUser(mockedUser);
+
       expect(ormGroupRepository.createQueryBuilder).toBeCalledWith('group');
       expect(
         ormGroupRepository.createQueryBuilder('').innerJoin,
@@ -234,7 +171,6 @@ describe('OrmGroup Repository Adapter', () => {
         ormGroupRepository.createQueryBuilder('').innerJoin('', '')
           .innerJoinAndMapOne,
       ).toBeCalledWith('group.owner', 'user', 'u', 'u.id = group.owner.id');
-
       expect(
         ormGroupRepository
           .createQueryBuilder('')
@@ -259,29 +195,18 @@ describe('OrmGroup Repository Adapter', () => {
 
     it('Should return same of orm', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
         innerJoin: jest.fn().mockReturnValue({
           innerJoinAndMapOne: jest.fn().mockReturnValue({
             innerJoin: jest.fn().mockReturnValue({
-              getMany: jest.fn().mockResolvedValueOnce([group, group]),
+              getMany: jest
+                .fn()
+                .mockResolvedValueOnce([mockedGroup, mockedGroup]),
             }),
           }),
         }),
       });
+
       const result = await sut.findByUser(
         UserEntity.create({
           id: 'any_user_id',
@@ -290,38 +215,20 @@ describe('OrmGroup Repository Adapter', () => {
           password: 'any_user_password',
         }),
       );
-      expect(result).toEqual([group, group]);
+
+      expect(result).toEqual([mockedGroup, mockedGroup]);
     });
 
     it('Should throw RepositoryError.OperationError if RepositoryError', async () => {
       const { sut, ormGroupRepository } = makeSut();
-      const group = GroupEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        description: 'any_description',
-        messages: [],
-        owner: UserEntity.create({
-          id: 'any_user_id',
-          email: 'any_user_email',
-          name: 'any_user_name',
-          password: 'any_user_password',
-        }),
-        users: [],
-      });
-
       jest
         .spyOn(ormGroupRepository, 'createQueryBuilder')
         .mockImplementationOnce(() => {
           throw new Error();
         });
-      const promise = sut.findByUser(
-        UserEntity.create({
-          id: 'another_user_id',
-          email: 'another_user_email',
-          name: 'another_user_name',
-          password: 'another_user_password',
-        }),
-      );
+
+      const promise = sut.findByUser(anotherMockedUser);
+
       await expect(promise).rejects.toThrowError(
         RepositoryError.OperationError,
       );

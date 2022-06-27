@@ -1,28 +1,13 @@
-import {
-  CreateGroupUseCaseI,
-  CreateGroupUseCaseProps,
-} from '@application/usecases';
+import { CreateGroupUseCaseStub } from '@application-unit/mocks/usecases';
 import { GroupEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { GroupWebSocketProviderStub } from '@presentation-unit/mocks';
 import { CreateGroupController } from '@presentation/controllers';
-import { GroupWebSocketProviderI } from '@presentation/protocols';
 
-//TODO: CONTINUE HERE REFACTOR...
-class GroupWebSocketProviderStub implements GroupWebSocketProviderI {
-  emitToUserAddedToGroup(userId: string, group: GroupEntity): Promise<void> {
-    return;
-  }
-  emitToUserRemovedFromGroup(
-    userId: string,
-    group: GroupEntity,
-  ): Promise<void> {
-    return;
-  }
-}
 const mockStorageGroup = GroupEntity.create({
   id: 'any_id',
   name: 'any_name',
@@ -49,36 +34,43 @@ const mockStorageGroup = GroupEntity.create({
     }),
   ],
 });
-class CreateGroupUseCaseStub implements CreateGroupUseCaseI {
-  async execute(
-    createGroupUsecaseProps: CreateGroupUseCaseProps,
-  ): Promise<GroupEntity> {
-    return mockStorageGroup;
-  }
-}
 
-describe('CreateGroup Controller', () => {
+const mockedCurrentUser = UserEntity.create({
+  email: 'any_current_user_email',
+  id: 'any_current_user_id',
+  name: 'any_current_user_name',
+  password: 'any_current_user_password',
+});
+
+type SutTypes = {
+  sut: CreateGroupController;
+  createGroupUsecase: CreateGroupUseCaseStub;
+  groupWebSocketProvider: GroupWebSocketProviderStub;
+};
+
+const makeSut = (): SutTypes => {
+  const createGroupUsecase = new CreateGroupUseCaseStub();
+  const groupWebSocketProvider = new GroupWebSocketProviderStub();
+  const sut = new CreateGroupController(
+    createGroupUsecase,
+    groupWebSocketProvider,
+  );
+
+  createGroupUsecase.execute = jest.fn().mockResolvedValue(mockStorageGroup);
+
+  return { sut, createGroupUsecase, groupWebSocketProvider };
+};
+
+describe('CreateGroup || Controller || Suit', () => {
   it('Should call usecase correctly', async () => {
-    const createGroupUsecase = new CreateGroupUseCaseStub();
-    const groupWebSocketProvider = new GroupWebSocketProviderStub();
-    const sut = new CreateGroupController(
-      createGroupUsecase,
-      groupWebSocketProvider,
-    );
-    jest.spyOn(createGroupUsecase, 'execute');
-    await sut.handle(
-      UserEntity.create({
-        email: 'any_current_user_email',
-        id: 'any_current_user_id',
-        name: 'any_current_user_name',
-        password: 'any_current_user_password',
-      }),
-      {
-        name: 'any_name',
-        description: 'any_description',
-        usersIds: [],
-      },
-    );
+    const { createGroupUsecase, sut } = makeSut();
+
+    await sut.handle(mockedCurrentUser, {
+      name: 'any_name',
+      description: 'any_description',
+      usersIds: [],
+    });
+
     expect(createGroupUsecase.execute).toHaveBeenCalledWith({
       name: 'any_name',
       description: 'any_description',
@@ -88,79 +80,44 @@ describe('CreateGroup Controller', () => {
   });
 
   it('Should throw BadRequest if MissingOwnerId is throwed', async () => {
-    const createGroupUsecase = new CreateGroupUseCaseStub();
-    const groupWebSocketProvider = new GroupWebSocketProviderStub();
-    const sut = new CreateGroupController(
-      createGroupUsecase,
-      groupWebSocketProvider,
-    );
+    const { sut, createGroupUsecase } = makeSut();
     jest
       .spyOn(createGroupUsecase, 'execute')
       .mockRejectedValueOnce(new DomainError.MissingGroupOwner());
-    const promise = sut.handle(
-      UserEntity.create({
-        email: 'any_current_user_email',
-        id: 'any_current_user_id',
-        name: 'any_current_user_name',
-        password: 'any_current_user_password',
-      }),
-      {
-        name: 'any_name',
-        description: 'any_description',
-        usersIds: [],
-      },
-    );
+
+    const promise = sut.handle(mockedCurrentUser, {
+      name: 'any_name',
+      description: 'any_description',
+      usersIds: [],
+    });
+
     await expect(promise).rejects.toThrow(BadRequestException);
   });
 
   it('Should throw ServerError if Unexpected is throwed', async () => {
-    const createGroupUsecase = new CreateGroupUseCaseStub();
-    const groupWebSocketProvider = new GroupWebSocketProviderStub();
-    const sut = new CreateGroupController(
-      createGroupUsecase,
-      groupWebSocketProvider,
-    );
+    const { sut, createGroupUsecase } = makeSut();
     jest
       .spyOn(createGroupUsecase, 'execute')
       .mockRejectedValueOnce(new DomainError.Unexpected());
-    const promise = sut.handle(
-      UserEntity.create({
-        email: 'any_current_user_email',
-        id: 'any_current_user_id',
-        name: 'any_current_user_name',
-        password: 'any_current_user_password',
-      }),
-      {
-        name: 'any_name',
-        description: 'any_description',
-        usersIds: [],
-      },
-    );
+
+    const promise = sut.handle(mockedCurrentUser, {
+      name: 'any_name',
+      description: 'any_description',
+      usersIds: [],
+    });
+
     await expect(promise).rejects.toThrow(InternalServerErrorException);
   });
 
   it('Should return GroupDto on succeed and emit on websocket for users', async () => {
-    const createGroupUsecase = new CreateGroupUseCaseStub();
-    const groupWebSocketProvider = new GroupWebSocketProviderStub();
-    const sut = new CreateGroupController(
-      createGroupUsecase,
-      groupWebSocketProvider,
-    );
-    jest.spyOn(createGroupUsecase, 'execute');
-    jest.spyOn(groupWebSocketProvider, 'emitToUserAddedToGroup');
-    const group = await sut.handle(
-      UserEntity.create({
-        email: 'any_current_user_email',
-        id: 'any_current_user_id',
-        name: 'any_current_user_name',
-        password: 'any_current_user_password',
-      }),
-      {
-        name: 'any_name',
-        description: 'any_description',
-        usersIds: ['any_user_1', 'any_user_2'],
-      },
-    );
+    const { sut, groupWebSocketProvider } = makeSut();
+
+    const group = await sut.handle(mockedCurrentUser, {
+      name: 'any_name',
+      description: 'any_description',
+      usersIds: ['any_user_1', 'any_user_2'],
+    });
+
     expect(groupWebSocketProvider.emitToUserAddedToGroup).toBeCalledTimes(2);
     expect(groupWebSocketProvider.emitToUserAddedToGroup).toBeCalledWith(
       'any_user_1',

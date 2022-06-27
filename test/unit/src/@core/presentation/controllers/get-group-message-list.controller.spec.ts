@@ -1,7 +1,4 @@
-import {
-  GetGroupMessageListUseCaseI,
-  GetGroupMessageProps,
-} from '@application/usecases';
+import { GetGroupMessageListUseCaseStub } from '@application-unit/mocks/usecases';
 import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
@@ -30,34 +27,26 @@ const currentUserMock = UserEntity.create({
   password: 'any_password',
 });
 
-class GetGroupMessageListUseCaseStub implements GetGroupMessageListUseCaseI {
-  async execute({ groupId }: GetGroupMessageProps): Promise<MessageEntity[]> {
-    return [
-      MessageEntity.create({
-        id: 'any_message_id_1',
-        content: 'any_message_content_1',
-        sender: UserEntity.create({
-          id: 'any_owner_id',
-          email: 'any_owner_email',
-          name: 'any_owner_name',
-          password: 'any_owner_password',
-        }),
-        group: mockedGroup,
-      }),
-      MessageEntity.create({
-        id: 'any_message_id_2',
-        content: 'any_message_content_2',
-        sender: UserEntity.create({
-          id: 'any_owner_id',
-          email: 'any_owner_email',
-          name: 'any_owner_name',
-          password: 'any_owner_password',
-        }),
-        group: mockedGroup,
-      }),
-    ];
-  }
-}
+const owner = UserEntity.create({
+  id: 'any_owner_id',
+  email: 'any_owner_email',
+  name: 'any_owner_name',
+  password: 'any_owner_password',
+});
+
+const firstMockedMessage = MessageEntity.create({
+  id: 'any_message_id_1',
+  content: 'any_message_content_1',
+  sender: owner,
+  group: mockedGroup,
+});
+
+const secondMockedMessage = MessageEntity.create({
+  id: 'any_message_id_2',
+  content: 'any_message_content_2',
+  sender: owner,
+  group: mockedGroup,
+});
 
 type SutTypes = {
   getGroupMessagesStub: GetGroupMessageListUseCaseStub;
@@ -66,14 +55,17 @@ type SutTypes = {
 const makeSut = (): SutTypes => {
   const getGroupMessagesStub = new GetGroupMessageListUseCaseStub();
   const sut = new GetGroupMessageListController(getGroupMessagesStub);
+
+  getGroupMessagesStub.execute = jest
+    .fn()
+    .mockResolvedValue([firstMockedMessage, secondMockedMessage]);
+
   return { sut, getGroupMessagesStub };
 };
 
-describe('Get Group Messages Controller Suit', () => {
+describe('GetGroupMessages || Controller || Suit', () => {
   it('Should call usecase correctly', async () => {
     const { sut, getGroupMessagesStub } = makeSut();
-
-    jest.spyOn(getGroupMessagesStub, 'execute');
 
     await sut.handle(currentUserMock, { groupId: 'any_group_id' });
 

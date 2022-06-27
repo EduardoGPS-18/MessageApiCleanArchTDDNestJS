@@ -1,4 +1,4 @@
-import { RegisterUserProps, RegisterUserUseCaseI } from '@application/usecases';
+import { RegisterUserUsecaseStub } from '@application-unit/mocks/usecases';
 import { UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import {
@@ -9,35 +9,35 @@ import { SignupController } from '@presentation/controllers';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-class RegisterUserUsecaseStub implements RegisterUserUseCaseI {
-  async execute(props: RegisterUserProps): Promise<UserEntity> {
-    return {
-      id: 'any_id',
-      name: 'any_name',
-      password: 'any_password',
-      email: 'any_email',
-      session: 'any_session',
-      updatedAt: new Date(),
-      createdAt: new Date(),
-      updateSession: jest.fn(),
-    };
-  }
-}
+const mockedRegisteredUser: UserEntity = {
+  id: 'any_id',
+  name: 'any_name',
+  password: 'any_password',
+  email: 'any_email',
+  session: 'any_session',
+  updatedAt: new Date(),
+  createdAt: new Date(),
+  updateSession: jest.fn(),
+};
+
 type SutTypes = {
   sut: SignupController;
   registerUserUsecaseStub: RegisterUserUsecaseStub;
 };
-
 const makeSut = (): SutTypes => {
   const registerUserUsecaseStub = new RegisterUserUsecaseStub();
   const sut = new SignupController(registerUserUsecaseStub);
+
+  registerUserUsecaseStub.execute = jest
+    .fn()
+    .mockResolvedValue(mockedRegisteredUser);
+
   return { sut, registerUserUsecaseStub };
 };
 
-describe('Signup Controller', () => {
+describe('Signup || Controller || Suit', () => {
   it('Should call usecase correctly', async () => {
     const { sut, registerUserUsecaseStub } = makeSut();
-    jest.spyOn(registerUserUsecaseStub, 'execute');
 
     await sut.handle({
       email: 'any_email',

@@ -47,7 +47,6 @@ export class SendMessageToGroupUseCase implements SendMessageToGroupUseCaseI {
 
       return message;
     } catch (err) {
-      console.log(err);
       if (
         err instanceof DomainError.UserIsntInGroup ||
         err instanceof DomainError.InvalidUser ||

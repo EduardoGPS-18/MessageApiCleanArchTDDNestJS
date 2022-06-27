@@ -1,6 +1,6 @@
 export * from './add-user-to-group.use-case';
 export * from './create-group.use-case';
-export * from './delete-message-of-group.usecase';
+export * from './delete-message-of-group.use-case';
 export * from './edit-message.use-case';
 export * from './get-group-messages.use-case';
 export * from './get-user-group-list.use-case';

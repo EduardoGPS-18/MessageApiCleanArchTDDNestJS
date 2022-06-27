@@ -55,7 +55,6 @@ const makeSut = (): SutTypes => {
 describe('AddUserToGroup || Controller || Suit', () => {
   it('Should call usecase correctly', async () => {
     const { sut, addUserToGroupUseCase } = makeSut();
-    jest.spyOn(addUserToGroupUseCase, 'execute');
 
     await sut.handle(currentUserMock, {
       groupId: 'any_group_id',
