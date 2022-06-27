@@ -5,6 +5,8 @@ import { PresentationHelpers } from '@presentation/helpers/methods';
 import { GroupWebSocketProviderGateway } from '@presentation/providers';
 import { Socket } from 'socket.io';
 
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
 class ValidateUserUseCaseStub implements ValidateUserUseCaseI {
   async execute(props: ValidateUserProps): Promise<UserEntity> {
     return UserEntity.create({

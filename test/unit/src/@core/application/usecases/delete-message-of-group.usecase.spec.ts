@@ -2,13 +2,13 @@ import {
   DeleteMessageUseCase,
   DeleteMessageUseCaseI,
 } from '@application/usecases';
+import {
+  GroupRepositoryStub,
+  MessageRepositoryStub,
+  UserRepositoryStub,
+} from '@domain-unit/mocks';
 import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
 import { DomainError, RepositoryError } from '@domain/errors';
-import {
-  GroupRepository,
-  MessageRepository,
-  UserRepository,
-} from '@domain/repositories';
 
 const mockedMsg = MessageEntity.create({
   id: 'any_message_id',
@@ -33,73 +33,28 @@ const mockedMsg = MessageEntity.create({
     password: 'any_owner_password',
   }),
 });
-class MessageRepositoryStub implements MessageRepository {
-  update(message: MessageEntity): Promise<void> {
-    return;
-  }
-  async findById(id: string): Promise<MessageEntity> {
-    return mockedMsg;
-  }
-  delete(message: MessageEntity): Promise<void> {
-    return;
-  }
-  insert(message: MessageEntity): Promise<void> {
-    return;
-  }
-  findByGroup(group: GroupEntity): Promise<MessageEntity[]> {
-    return;
-  }
-}
 
-class GroupRepositoryStub implements GroupRepository {
-  findByUser(user: UserEntity): Promise<GroupEntity[]> {
-    return;
-  }
-  insert(group: GroupEntity): Promise<void> {
-    return;
-  }
-  update(group: GroupEntity): Promise<void> {
-    return;
-  }
-  async findById(id: string): Promise<GroupEntity> {
-    return GroupEntity.create({
-      id: 'any_group_id',
-      description: 'any_group_description',
-      messages: [],
-      name: 'any_group_name',
-      owner: UserEntity.create({
-        id: 'any_owner_id',
-        email: 'any_owner_email',
-        name: 'any_owner_name',
-        password: 'any_owner_password',
-      }),
-      users: [],
-    });
-  }
-}
+const group = GroupEntity.create({
+  id: 'any_group_id',
+  description: 'any_group_description',
+  messages: [],
+  name: 'any_group_name',
+  owner: UserEntity.create({
+    id: 'any_owner_id',
+    email: 'any_owner_email',
+    name: 'any_owner_name',
+    password: 'any_owner_password',
+  }),
+  users: [],
+});
 
-class UserRepositoryStub implements UserRepository {
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  async findOneById(id: string): Promise<UserEntity> {
-    return UserEntity.create({
-      id: 'any_owner_id',
-      email: 'any_owner_email',
-      name: 'any_owner_name',
-      password: 'any_owner_password',
-    });
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return;
-  }
-}
+const user = UserEntity.create({
+  id: 'any_owner_id',
+  email: 'any_owner_email',
+  name: 'any_owner_name',
+  password: 'any_owner_password',
+});
+
 type SutTypes = {
   sut: DeleteMessageUseCaseI;
   userRepository: UserRepositoryStub;
@@ -115,6 +70,11 @@ const makeSut = (): SutTypes => {
     groupRepository,
     messageRepository,
   );
+
+  userRepository.findOneById = jest.fn().mockResolvedValue(user);
+  groupRepository.findById = jest.fn().mockResolvedValue(group);
+  messageRepository.findById = jest.fn().mockResolvedValue(mockedMsg);
+
   return {
     sut,
     userRepository,
@@ -127,10 +87,6 @@ describe('Delete message of group suit', () => {
   it('Should call dependencies correctly', async () => {
     const { sut, userRepository, groupRepository, messageRepository } =
       makeSut();
-
-    jest.spyOn(userRepository, 'findOneById');
-    jest.spyOn(messageRepository, 'findById');
-    jest.spyOn(groupRepository, 'findById');
 
     await sut.execute({
       groupId: 'any_group_id',
@@ -162,7 +118,6 @@ describe('Delete message of group suit', () => {
 
   it('Should throw Unexpected if user repository throws', async () => {
     const { sut, userRepository } = makeSut();
-
     jest.spyOn(userRepository, 'findOneById').mockResolvedValue(null);
 
     const promise = sut.execute({
@@ -176,7 +131,6 @@ describe('Delete message of group suit', () => {
 
   it('Should throw Unexpected if user repository throws', async () => {
     const { sut, groupRepository } = makeSut();
-
     jest.spyOn(groupRepository, 'findById').mockResolvedValue(null);
 
     const promise = sut.execute({
@@ -190,7 +144,6 @@ describe('Delete message of group suit', () => {
 
   it('Should throw Unexpected if user repository throws', async () => {
     const { sut, messageRepository } = makeSut();
-
     jest.spyOn(messageRepository, 'findById').mockResolvedValue(null);
 
     const promise = sut.execute({
@@ -204,7 +157,6 @@ describe('Delete message of group suit', () => {
 
   it('Should throw CurrentUserIsntMessageOwner if user isnt message owner', async () => {
     const { sut, userRepository } = makeSut();
-
     jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
       UserEntity.create({
         id: 'another_user_id',
@@ -227,12 +179,13 @@ describe('Delete message of group suit', () => {
 
   it('Should remove message on success', async () => {
     const { sut, messageRepository } = makeSut();
-    jest.spyOn(messageRepository, 'delete');
+
     await sut.execute({
       groupId: 'any_group_id',
       currentUserId: 'another_user_id',
       messageId: 'any_message_id',
     });
+
     expect(messageRepository.delete).toBeCalledWith(mockedMsg);
   });
 });

@@ -1,63 +1,30 @@
 import { CreateGroupUseCase } from '@application/usecases';
-import { GroupEntity, UserEntity } from '@domain/entities';
+import { GroupRepositoryStub, UserRepositoryStub } from '@domain-unit/mocks';
+import { UserEntity } from '@domain/entities';
 import { DomainError, RepositoryError } from '@domain/errors';
-import { GroupRepository, UserRepository } from '@domain/repositories';
 import * as crypto from 'crypto';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 jest.mock('crypto');
 
-class GroupRepositoryStub implements GroupRepository {
-  findByUser(user: UserEntity): Promise<GroupEntity[]> {
-    return;
-  }
-  update(group: GroupEntity): Promise<void> {
-    return;
-  }
-  findById(id: string): Promise<GroupEntity> {
-    return;
-  }
-  insert(group: GroupEntity): Promise<void> {
-    return;
-  }
-}
-class UserRepositoryStub implements UserRepository {
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  findOneById(id: string): Promise<UserEntity> {
-    return Promise.resolve(
-      UserEntity.create({
-        id: 'any_owner_id',
-        name: 'any_owner_name',
-        email: 'any_owner_email',
-        password: 'any_owner_password',
-      }),
-    );
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return Promise.resolve([
-      UserEntity.create({
-        id: 'any_user_id_1',
-        name: 'any_user_name_1',
-        email: 'any_user_email_1',
-        password: 'any_user_password_1',
-      }),
-      UserEntity.create({
-        id: 'any_user_id_2',
-        name: 'any_user_name_2',
-        email: 'any_user_email_2',
-        password: 'any_user_password_2',
-      }),
-    ]);
-  }
-}
+const owner = UserEntity.create({
+  id: 'any_owner_id',
+  name: 'any_owner_name',
+  email: 'any_owner_email',
+  password: 'any_owner_password',
+});
+const user = UserEntity.create({
+  id: 'any_user_id_1',
+  name: 'any_user_name_1',
+  email: 'any_user_email_1',
+  password: 'any_user_password_1',
+});
+const anotherUser = UserEntity.create({
+  id: 'any_user_id_2',
+  name: 'any_user_name_2',
+  email: 'any_user_email_2',
+  password: 'any_user_password_2',
+});
 
 type SutTypes = {
   groupRepository: GroupRepositoryStub;
@@ -67,18 +34,20 @@ type SutTypes = {
 const makeSut = (): SutTypes => {
   const groupRepository = new GroupRepositoryStub();
   const userRepository = new UserRepositoryStub();
-
   const sut = new CreateGroupUseCase(groupRepository, userRepository);
+
+  jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
+  userRepository.findUserListByIdList = jest
+    .fn()
+    .mockResolvedValue([user, anotherUser]);
+  userRepository.findOneById = jest.fn().mockResolvedValue(owner);
+
   return { sut, groupRepository, userRepository };
 };
 
 describe('CreateGroup Use Case', () => {
   it('Should call dependencies correctly', async () => {
     const { sut, groupRepository, userRepository } = makeSut();
-    jest.spyOn(groupRepository, 'insert');
-    jest.spyOn(userRepository, 'findOneById');
-    jest.spyOn(userRepository, 'findUserListByIdList');
-    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
 
     await sut.execute({
       name: 'any_group_name',
@@ -86,6 +55,7 @@ describe('CreateGroup Use Case', () => {
       ownerId: 'any_owner_id',
       usersIds: ['any_user_id_1', 'any_user_id_2'],
     });
+
     expect(crypto.randomUUID).toBeCalledTimes(1);
     expect(userRepository.findOneById).toHaveBeenCalledWith('any_owner_id');
     expect(userRepository.findUserListByIdList).toHaveBeenCalledWith([
@@ -125,10 +95,9 @@ describe('CreateGroup Use Case', () => {
   it('Should throw unexpected if groupRepository.insert fails', async () => {
     const { sut, groupRepository } = makeSut();
 
-    jest
-      .spyOn(groupRepository, 'insert')
+    groupRepository.insert = jest
+      .fn()
       .mockRejectedValueOnce(new RepositoryError.OperationError());
-    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
 
     const promise = sut.execute({
       name: 'any_group_name',
@@ -146,7 +115,6 @@ describe('CreateGroup Use Case', () => {
     jest
       .spyOn(userRepository, 'findOneById')
       .mockRejectedValueOnce(new RepositoryError.OperationError());
-    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
 
     const promise = sut.execute({
       name: 'any_group_name',
@@ -164,7 +132,6 @@ describe('CreateGroup Use Case', () => {
     jest
       .spyOn(userRepository, 'findUserListByIdList')
       .mockRejectedValueOnce(new RepositoryError.OperationError());
-    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
 
     const promise = sut.execute({
       name: 'any_group_name',
@@ -180,7 +147,6 @@ describe('CreateGroup Use Case', () => {
     const { sut, userRepository } = makeSut();
 
     jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(null);
-    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
 
     const promise = sut.execute({
       name: 'any_group_name',
@@ -195,7 +161,6 @@ describe('CreateGroup Use Case', () => {
   it('Should return group entity on proccess succeed', async () => {
     const { sut } = makeSut();
 
-    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('gen_uuid');
     const group = await sut.execute({
       name: 'any_group_name',
       description: 'any_group_description',

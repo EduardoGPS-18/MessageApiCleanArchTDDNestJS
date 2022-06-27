@@ -1,91 +1,61 @@
 import { SendMessageToGroupUseCase } from '@application/usecases';
+import {
+  GroupRepositoryStub,
+  MessageRepositoryStub,
+  UserRepositoryStub,
+} from '@domain-unit/mocks';
 import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
-import {
-  GroupRepository,
-  MessageRepository,
-  UserRepository,
-} from '@domain/repositories';
 import * as crypto from 'crypto';
-
-jest.mock('crypto');
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
+jest.mock('crypto');
 jest.spyOn(crypto, 'randomUUID').mockReturnValue('gen_uuid');
 
-class GroupRepositoryStub implements GroupRepository {
-  findByUser(user: UserEntity): Promise<GroupEntity[]> {
-    return;
-  }
-  update(group: GroupEntity): Promise<void> {
-    return;
-  }
-  findById(id: string): Promise<GroupEntity> {
-    return Promise.resolve(
-      GroupEntity.create({
-        id: 'any_group',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          email: 'any_user_email',
-          id: 'any_user_id',
-          name: 'any_user_name',
-          password: 'any_user_password',
-          session: 'any_user_session',
-        }),
-        users: [],
-      }),
-    );
-  }
-  insert(group: GroupEntity): Promise<void> {
-    return;
-  }
-}
+const user = UserEntity.create({
+  id: 'any_user_id',
+  email: 'any_user_email',
+  name: 'any_user_name',
+  password: 'any_user_password',
+});
 
-class MessageRepositoryStub implements MessageRepository {
-  update(message: MessageEntity): Promise<void> {
-    return;
-  }
-  findById(id: string): Promise<MessageEntity> {
-    return;
-  }
-  delete(message: MessageEntity): Promise<void> {
-    return;
-  }
-  insert(message: MessageEntity): Promise<void> {
-    return;
-  }
-  findByGroup(group: GroupEntity): Promise<MessageEntity[]> {
-    return;
-  }
-}
+const userOutOfGroup = UserEntity.create({
+  id: 'sender_out_of_group_id',
+  email: 'sender_out_of_group_email',
+  name: 'sender_out_of_group_name',
+  password: 'sender_out_of_group_pass',
+});
 
-class UserRepositoryStub implements UserRepository {
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  findOneById(id: string): Promise<UserEntity> {
-    return Promise.resolve(
-      UserEntity.create({
-        id: 'any_user_id',
-        email: 'any_user_email',
-        name: 'any_user_name',
-        password: 'any_user_password',
-      }),
-    );
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return;
-  }
-}
+const owner = UserEntity.create({
+  id: 'owner_id',
+  email: 'owner_email',
+  name: 'owner_name',
+  password: 'owner_password',
+});
+
+const group = GroupEntity.create({
+  id: 'any_group',
+  name: 'any_name',
+  description: 'any_description',
+  owner: owner,
+  messages: [],
+  users: [],
+});
+
+const message = MessageEntity.create({
+  group: GroupEntity.create({
+    id: 'any_group',
+    description: 'any_description',
+    messages: [],
+    name: 'any_name',
+    owner: owner,
+    users: [],
+  }),
+  content: 'any_message',
+  id: 'gen_uuid',
+  sender: owner,
+});
 
 type SutTypes = {
   groupRepository: GroupRepositoryStub;
@@ -102,36 +72,16 @@ const makeSut = (): SutTypes => {
     userRepository,
     messageRepository,
   );
+
+  userRepository.findOneById = jest.fn().mockResolvedValue(owner);
+  groupRepository.findById = jest.fn().mockResolvedValue(group);
+
   return { sut, groupRepository, userRepository, messageRepository };
 };
 describe('SendMessageToGroup Usecase', () => {
   it('Should call dependencies correctly', async () => {
     const { sut, groupRepository, userRepository, messageRepository } =
       makeSut();
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      UserEntity.create({
-        id: 'owner_id',
-        email: 'owner_email',
-        name: 'owner_name',
-        password: 'owner_password',
-      }),
-    );
-    jest.spyOn(groupRepository, 'findById').mockResolvedValueOnce(
-      GroupEntity.create({
-        id: 'any_group',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-        users: [],
-      }),
-    );
-    jest.spyOn(messageRepository, 'insert');
 
     await sut.execute({
       messageContent: 'any_message',
@@ -141,59 +91,14 @@ describe('SendMessageToGroup Usecase', () => {
 
     expect(groupRepository.findById).toHaveBeenCalledWith('any_group');
     expect(userRepository.findOneById).toHaveBeenCalledWith('owner_id');
-    expect(messageRepository.insert).toHaveBeenCalledWith(
-      MessageEntity.create({
-        group: GroupEntity.create({
-          id: 'any_group',
-          description: 'any_description',
-          messages: [],
-          name: 'any_name',
-          owner: UserEntity.create({
-            id: 'owner_id',
-            email: 'owner_email',
-            name: 'owner_name',
-            password: 'owner_password',
-          }),
-          users: [],
-        }),
-        content: 'any_message',
-        id: 'gen_uuid',
-        sender: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-      }),
-    );
+    expect(messageRepository.insert).toHaveBeenCalledWith(message);
   });
 
   it('Should throw if sender isnt in group', async () => {
-    const { sut, groupRepository, userRepository, messageRepository } =
-      makeSut();
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      UserEntity.create({
-        id: 'sender_out_of_group_id',
-        email: 'sender_out_of_group_email',
-        name: 'sender_out_of_group_name',
-        password: 'sender_out_of_group_pass',
-      }),
-    );
-    jest.spyOn(groupRepository, 'findById').mockResolvedValueOnce(
-      GroupEntity.create({
-        id: 'any_group_id',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-        users: [],
-      }),
-    );
+    const { sut, userRepository } = makeSut();
+    jest
+      .spyOn(userRepository, 'findOneById')
+      .mockResolvedValueOnce(userOutOfGroup);
 
     const promise = sut.execute({
       messageContent: 'any_message',
@@ -205,23 +110,8 @@ describe('SendMessageToGroup Usecase', () => {
   });
 
   it('Should throw InvalidUser if sender isnt valid', async () => {
-    const { sut, userRepository, groupRepository } = makeSut();
+    const { sut, userRepository } = makeSut();
     jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(null);
-    jest.spyOn(groupRepository, 'findById').mockResolvedValueOnce(
-      GroupEntity.create({
-        id: 'any_group_id',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-        users: [],
-      }),
-    );
 
     const promise = sut.execute({
       messageContent: 'any_message',
@@ -232,17 +122,9 @@ describe('SendMessageToGroup Usecase', () => {
     await expect(promise).rejects.toThrowError(DomainError.InvalidUser);
   });
 
-  it('Should throw InvalidGroup if user isnt valid', async () => {
-    const { sut, userRepository, groupRepository } = makeSut();
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      UserEntity.create({
-        id: 'sender_out_of_group_id',
-        email: 'sender_out_of_group_email',
-        name: 'sender_out_of_group_name',
-        password: 'sender_out_of_group_pass',
-      }),
-    );
-    jest.spyOn(groupRepository, 'findById').mockResolvedValueOnce(null);
+  it('Should throw InvalidGroup if group isnt valid', async () => {
+    const { sut, groupRepository } = makeSut();
+    groupRepository.findById = jest.fn().mockResolvedValueOnce(null);
 
     const promise = sut.execute({
       messageContent: 'any_message',
@@ -253,16 +135,8 @@ describe('SendMessageToGroup Usecase', () => {
     await expect(promise).rejects.toThrowError(DomainError.InvalidGroup);
   });
 
-  it('Should throw DomainError.Unexpected to another repository error', async () => {
-    const { sut, userRepository, groupRepository } = makeSut();
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      UserEntity.create({
-        id: 'sender_out_of_group_id',
-        email: 'sender_out_of_group_email',
-        name: 'sender_out_of_group_name',
-        password: 'sender_out_of_group_pass',
-      }),
-    );
+  it('Should throw DomainError.Unexpected to another groupRepository.repository error', async () => {
+    const { sut, groupRepository } = makeSut();
     jest.spyOn(groupRepository, 'findById').mockRejectedValueOnce(new Error());
 
     const promise = sut.execute({
@@ -274,26 +148,11 @@ describe('SendMessageToGroup Usecase', () => {
     await expect(promise).rejects.toThrowError(DomainError.Unexpected);
   });
 
-  it('Should throw DomainError.Unexpected to another repository error', async () => {
-    const { sut, userRepository, groupRepository } = makeSut();
+  it('Should throw DomainError.Unexpected to another userRepository.repository error', async () => {
+    const { sut, userRepository } = makeSut();
     jest
       .spyOn(userRepository, 'findOneById')
       .mockRejectedValueOnce(new Error());
-    jest.spyOn(groupRepository, 'findById').mockRejectedValueOnce(
-      GroupEntity.create({
-        id: 'any_group_id',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-        users: [],
-      }),
-    );
 
     const promise = sut.execute({
       messageContent: 'any_message',
@@ -305,31 +164,7 @@ describe('SendMessageToGroup Usecase', () => {
   });
 
   it('Should add message to a group on operation succeed', async () => {
-    const { sut, groupRepository, userRepository, messageRepository } =
-      makeSut();
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      UserEntity.create({
-        id: 'owner_id',
-        email: 'owner_email',
-        name: 'owner_name',
-        password: 'owner_password',
-      }),
-    );
-    jest.spyOn(groupRepository, 'findById').mockResolvedValueOnce(
-      GroupEntity.create({
-        id: 'any_group_id',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-        users: [],
-      }),
-    );
+    const { sut } = makeSut();
 
     const message = await sut.execute({
       messageContent: 'any_message',
@@ -342,53 +177,20 @@ describe('SendMessageToGroup Usecase', () => {
         id: 'gen_uuid',
         content: 'any_message',
         group: GroupEntity.create({
-          id: 'any_group_id',
+          id: 'any_group',
           description: 'any_description',
           messages: [],
           name: 'any_name',
-          owner: UserEntity.create({
-            id: 'owner_id',
-            email: 'owner_email',
-            name: 'owner_name',
-            password: 'owner_password',
-          }),
+          owner: owner,
           users: [],
         }),
-        sender: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
+        sender: owner,
       }),
     );
   });
 
   it('Should rethrow if message creation throw', async () => {
-    const { sut, userRepository, groupRepository } = makeSut();
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      UserEntity.create({
-        id: 'owner_id',
-        email: 'owner_email',
-        name: 'owner_name',
-        password: 'owner_password',
-      }),
-    );
-    jest.spyOn(groupRepository, 'findById').mockResolvedValueOnce(
-      GroupEntity.create({
-        id: 'any_group_id',
-        description: 'any_description',
-        messages: [],
-        name: 'any_name',
-        owner: UserEntity.create({
-          id: 'owner_id',
-          email: 'owner_email',
-          name: 'owner_name',
-          password: 'owner_password',
-        }),
-        users: [],
-      }),
-    );
+    const { sut } = makeSut();
 
     const promise = sut.execute({
       messageContent: '',

@@ -1,26 +1,34 @@
 import { GetGroupMessageListUseCase } from '@application/usecases';
+import {
+  GroupRepositoryStub,
+  MessageRepositoryStub,
+  UserRepositoryStub,
+} from '@domain-unit/mocks';
 import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
 import { DomainError, RepositoryError } from '@domain/errors';
-import {
-  GroupRepository,
-  MessageRepository,
-  UserRepository,
-} from '@domain/repositories';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-const userInGroup = UserEntity.create({
+const mockedUserInGroup = UserEntity.create({
   email: 'any_mail',
   id: 'any_id',
   name: 'any_name',
   password: 'any_password',
 });
+
+const mockedUserOutOfGroup = UserEntity.create({
+  email: 'user_out_of_group_email',
+  id: 'user_out_of_group_id',
+  name: 'user_out_of_group_name',
+  password: 'user_out_of_group_password',
+});
+
 const mockedGroup = GroupEntity.create({
   description: 'any_description',
   id: 'any_group_id',
   name: 'any_group_name',
   messages: [],
-  users: [userInGroup],
+  users: [mockedUserInGroup],
   owner: UserEntity.create({
     id: 'any_owner_id',
     email: 'any_owner_email',
@@ -29,219 +37,143 @@ const mockedGroup = GroupEntity.create({
   }),
 });
 
-class UserRepositoryStub implements UserRepository {
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  async findOneById(id: string): Promise<UserEntity> {
-    return userInGroup;
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return;
-  }
-}
+const mockedFirstMessage = MessageEntity.create({
+  content: 'any_content_1',
+  id: 'any_id_1',
+  sender: UserEntity.create({
+    email: 'any_sender_mail',
+    id: 'any_sender_id',
+    name: 'any_sender_name',
+    password: 'any_sender_password',
+  }),
+  group: mockedGroup,
+});
 
-class GroupRepositoryStub implements GroupRepository {
-  findByUser(user: UserEntity): Promise<GroupEntity[]> {
-    return;
-  }
-  insert(group: GroupEntity): Promise<void> {
-    return;
-  }
-  update(group: GroupEntity): Promise<void> {
-    return;
-  }
-  async findById(id: string): Promise<GroupEntity> {
-    return mockedGroup;
-  }
-}
-
-class MessageRepositoryStub implements MessageRepository {
-  update(message: MessageEntity): Promise<void> {
-    return;
-  }
-  findById(id: string): Promise<MessageEntity> {
-    return;
-  }
-  delete(message: MessageEntity): Promise<void> {
-    return;
-  }
-  insert(message: MessageEntity): Promise<void> {
-    return;
-  }
-  async findByGroup(group: GroupEntity): Promise<MessageEntity[]> {
-    return [
-      MessageEntity.create({
-        content: 'any_content_1',
-        id: 'any_id_1',
-        sender: UserEntity.create({
-          email: 'any_sender_mail',
-          id: 'any_sender_id',
-          name: 'any_sender_name',
-          password: 'any_sender_password',
-        }),
-        group: mockedGroup,
-      }),
-      MessageEntity.create({
-        content: 'any_content_2',
-        id: 'any_id_2',
-        sender: UserEntity.create({
-          email: 'any_sender_mail',
-          id: 'any_sender_id',
-          name: 'any_sender_name',
-          password: 'any_sender_password',
-        }),
-        group: mockedGroup,
-      }),
-    ];
-  }
-}
+const mockedSecondMessage = MessageEntity.create({
+  content: 'any_content_2',
+  id: 'any_id_2',
+  sender: UserEntity.create({
+    email: 'any_sender_mail',
+    id: 'any_sender_id',
+    name: 'any_sender_name',
+    password: 'any_sender_password',
+  }),
+  group: mockedGroup,
+});
 
 type SutTypes = {
   sut: GetGroupMessageListUseCase;
-  groupRepositoryStub: GroupRepositoryStub;
-  messageRepositoryStub: MessageRepositoryStub;
-  userRepositoryStub: UserRepositoryStub;
-  currentUser: UserEntity;
+  groupRepository: GroupRepositoryStub;
+  messageRepository: MessageRepositoryStub;
+  userRepository: UserRepositoryStub;
 };
 const makeSut = (): SutTypes => {
-  const groupRepositoryStub = new GroupRepositoryStub();
-  const messageRepositoryStub = new MessageRepositoryStub();
-  const userRepositoryStub = new UserRepositoryStub();
-  const currentUser = userInGroup;
+  const groupRepository = new GroupRepositoryStub();
+  const messageRepository = new MessageRepositoryStub();
+  const userRepository = new UserRepositoryStub();
+
   const sut = new GetGroupMessageListUseCase(
-    groupRepositoryStub,
-    messageRepositoryStub,
-    userRepositoryStub,
+    groupRepository,
+    messageRepository,
+    userRepository,
   );
-  return {
-    sut,
-    messageRepositoryStub,
-    groupRepositoryStub,
-    userRepositoryStub,
-    currentUser,
-  };
+
+  messageRepository.findByGroup = jest
+    .fn()
+    .mockResolvedValue([mockedFirstMessage, mockedSecondMessage]);
+  userRepository.findOneById = jest.fn().mockResolvedValue(mockedUserInGroup);
+  groupRepository.findById = jest.fn().mockResolvedValue(mockedGroup);
+
+  return { sut, messageRepository, groupRepository, userRepository };
 };
+
 describe('Get Group Messages', () => {
   it('Should call correctly dependencies', async () => {
-    const { sut, groupRepositoryStub, messageRepositoryStub, currentUser } =
-      makeSut();
-    jest.spyOn(groupRepositoryStub, 'findById');
-    jest.spyOn(messageRepositoryStub, 'findByGroup');
+    const { sut, groupRepository, messageRepository } = makeSut();
 
-    await sut.execute({ groupId: 'any_group_id', userId: currentUser.id });
+    await sut.execute({
+      groupId: 'any_group_id',
+      userId: mockedUserInGroup.id,
+    });
 
-    expect(groupRepositoryStub.findById).toHaveBeenCalledWith('any_group_id');
-    expect(messageRepositoryStub.findByGroup).toHaveBeenCalledWith(mockedGroup);
+    expect(groupRepository.findById).toHaveBeenCalledWith('any_group_id');
+    expect(messageRepository.findByGroup).toHaveBeenCalledWith(mockedGroup);
   });
 
   it('Should throw DomainError.InvalidGroup if group not found', async () => {
-    const { sut, groupRepositoryStub, currentUser } = makeSut();
-    jest.spyOn(groupRepositoryStub, 'findById').mockResolvedValueOnce(null);
+    const { sut, groupRepository } = makeSut();
+    groupRepository.findById = jest.fn().mockResolvedValueOnce(null);
 
     const promise = sut.execute({
       groupId: 'any_group_id',
-      userId: currentUser.id,
+      userId: mockedUserInGroup.id,
     });
 
     await expect(promise).rejects.toThrowError(DomainError.InvalidGroup);
   });
 
   it('Should throw DomainError.UserIsntInGroup if user isnt in group', async () => {
-    const { sut, userRepositoryStub } = makeSut();
-    const currentUser = UserEntity.create({
-      email: 'user_out_of_group_email',
-      id: 'user_out_of_group_id',
-      name: 'user_out_of_group_name',
-      password: 'user_out_of_group_password',
-    });
-    jest
-      .spyOn(userRepositoryStub, 'findOneById')
-      .mockResolvedValueOnce(currentUser);
+    const { sut, userRepository } = makeSut();
+    userRepository.findOneById = jest
+      .fn()
+      .mockResolvedValueOnce(mockedUserOutOfGroup);
+
     const promise = sut.execute({
       groupId: 'any_group_id',
-      userId: currentUser.id,
+      userId: mockedUserOutOfGroup.id,
     });
 
     await expect(promise).rejects.toThrowError(DomainError.UserIsntInGroup);
   });
 
   it('Should throw DomainError.InvalidUser if user isnt found', async () => {
-    const { sut, userRepositoryStub } = makeSut();
+    const { sut, userRepository } = makeSut();
+    userRepository.findOneById = jest.fn().mockResolvedValueOnce(null);
 
-    jest.spyOn(userRepositoryStub, 'findOneById').mockResolvedValueOnce(null);
     const promise = sut.execute({
       groupId: 'any_group_id',
       userId: '',
     });
+
     await expect(promise).rejects.toThrowError(DomainError.InvalidUser);
   });
 
   it('Should throw DomainError.Unexpected if groupRepository throws RepositoryError.OperationError not found', async () => {
-    const { sut, groupRepositoryStub, currentUser } = makeSut();
-    jest
-      .spyOn(groupRepositoryStub, 'findById')
+    const { sut, groupRepository } = makeSut();
+    groupRepository.findById = jest
+      .fn()
       .mockRejectedValueOnce(new RepositoryError.OperationError());
 
     const promise = sut.execute({
       groupId: 'any_group_id',
-      userId: currentUser.id,
+      userId: mockedUserInGroup.id,
     });
 
     await expect(promise).rejects.toThrowError(DomainError.Unexpected);
   });
 
   it('Should throw DomainError.Unexpected if messageRepository throws RepositoryError.OperationError not found', async () => {
-    const { sut, messageRepositoryStub, currentUser } = makeSut();
-    jest
-      .spyOn(messageRepositoryStub, 'findByGroup')
+    const { sut, messageRepository } = makeSut();
+    messageRepository.findByGroup = jest
+      .fn()
       .mockRejectedValueOnce(new RepositoryError.OperationError());
 
     const promise = sut.execute({
       groupId: 'any_group_id',
-      userId: currentUser.id,
+      userId: mockedUserInGroup.id,
     });
 
     await expect(promise).rejects.toThrowError(DomainError.Unexpected);
   });
 
   it('Should return messages on operation success', async () => {
-    const { sut, currentUser } = makeSut();
+    const { sut } = makeSut();
 
     const messages = await sut.execute({
       groupId: 'any_group_id',
-      userId: currentUser.id,
+      userId: mockedUserInGroup.id,
     });
 
-    expect(messages).toEqual([
-      MessageEntity.create({
-        content: 'any_content_1',
-        id: 'any_id_1',
-        sender: UserEntity.create({
-          email: 'any_sender_mail',
-          id: 'any_sender_id',
-          name: 'any_sender_name',
-          password: 'any_sender_password',
-        }),
-        group: mockedGroup,
-      }),
-      MessageEntity.create({
-        content: 'any_content_2',
-        id: 'any_id_2',
-        sender: UserEntity.create({
-          email: 'any_sender_mail',
-          id: 'any_sender_id',
-          name: 'any_sender_name',
-          password: 'any_sender_password',
-        }),
-        group: mockedGroup,
-      }),
-    ]);
+    expect(messages).toEqual([mockedFirstMessage, mockedSecondMessage]);
   });
 });

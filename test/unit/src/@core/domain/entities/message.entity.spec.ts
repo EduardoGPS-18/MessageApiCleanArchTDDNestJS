@@ -3,7 +3,7 @@ import { DomainError } from '@domain/errors';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-describe('Message entity', () => {
+describe('Message || ENTITY || SUIT', () => {
   it('Should create a correct group', () => {
     const message = MessageEntity.create({
       id: 'any_id',

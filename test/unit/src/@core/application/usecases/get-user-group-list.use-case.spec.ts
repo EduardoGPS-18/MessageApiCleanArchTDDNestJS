@@ -1,13 +1,17 @@
 import { GetUserGroupListUseCase } from '@application/usecases';
+import { GroupRepositoryStub, UserRepositoryStub } from '@domain-unit/mocks';
 import { GroupEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
-import { GroupRepository, UserRepository } from '@domain/repositories';
+
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+
 const userInGroup = UserEntity.create({
   email: 'any_mail',
   id: 'any_id',
   name: 'any_name',
   password: 'any_password',
 });
+
 const mockedGroup = GroupEntity.create({
   description: 'any_description',
   id: 'any_group_id',
@@ -22,39 +26,6 @@ const mockedGroup = GroupEntity.create({
   }),
 });
 
-class UserRepositoryStub implements UserRepository {
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  async findOneById(id: string): Promise<UserEntity> {
-    return userInGroup;
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return;
-  }
-}
-
-class GroupRepositoryStub implements GroupRepository {
-  async findByUser(user: UserEntity): Promise<GroupEntity[]> {
-    return [mockedGroup, mockedGroup];
-  }
-  insert(group: GroupEntity): Promise<void> {
-    return;
-  }
-  update(group: GroupEntity): Promise<void> {
-    return;
-  }
-  async findById(id: string): Promise<GroupEntity> {
-    return;
-  }
-}
-
 type SutTypes = {
   sut: GetUserGroupListUseCase;
   userRepository: UserRepositoryStub;
@@ -64,15 +35,18 @@ const makeSut = (): SutTypes => {
   const groupRepository = new GroupRepositoryStub();
   const userRepository = new UserRepositoryStub();
   const sut = new GetUserGroupListUseCase(userRepository, groupRepository);
+
+  userRepository.findOneById = jest.fn().mockResolvedValue(userInGroup);
+  groupRepository.findByUser = jest
+    .fn()
+    .mockResolvedValue([mockedGroup, mockedGroup]);
+
   return { sut, groupRepository, userRepository };
 };
 
 describe('GetUserGroupList || UseCase || SUIT', () => {
   it('Should call dependencies correctly', async () => {
     const { sut, userRepository, groupRepository } = makeSut();
-
-    jest.spyOn(groupRepository, 'findByUser');
-    jest.spyOn(userRepository, 'findOneById');
 
     await sut.execute({
       userId: 'any_user_id',
@@ -84,7 +58,6 @@ describe('GetUserGroupList || UseCase || SUIT', () => {
 
   it('Should throw InvalidUser if user isnt found', async () => {
     const { sut, userRepository } = makeSut();
-
     jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(null);
 
     const promise = sut.execute({
@@ -96,7 +69,6 @@ describe('GetUserGroupList || UseCase || SUIT', () => {
 
   it('Should throw Unexpected if userRepository throws', async () => {
     const { sut, userRepository } = makeSut();
-
     jest
       .spyOn(userRepository, 'findOneById')
       .mockRejectedValueOnce(new Error());
@@ -110,7 +82,6 @@ describe('GetUserGroupList || UseCase || SUIT', () => {
 
   it('Should throw Unexpected if groupRepository throws', async () => {
     const { sut, groupRepository } = makeSut();
-
     jest
       .spyOn(groupRepository, 'findByUser')
       .mockRejectedValueOnce(new Error());

@@ -14,6 +14,11 @@ export default (): Config.InitialOptions => ({
     '^@domain/(.*)*': ['<rootDir>/src/@core/domain/$1'],
     '^@application/(.*)*': ['<rootDir>/src/@core/application/$1'],
     '^@presentation/(.*)*': ['<rootDir>/src/@core/presentation/$1'],
+    '^@domain-unit/(.*)*': ['<rootDir>/test/unit/src/@core/domain/$1'],
+    '^@application-unit/(.*)*': [
+      '<rootDir>/test/unit/src/@core/application/$1',
+    ],
   },
+  clearMocks: true,
   roots: ['<rootDir>/src', '<rootDir>/test'],
 });

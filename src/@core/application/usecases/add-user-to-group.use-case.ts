@@ -24,12 +24,14 @@ export class AddUserToGroupUseCase implements AddUserToGroupUseCaseI {
       const group = await this.groupRepository.findById(groupId);
       const toAddUser = await this.userRepository.findOneById(userId);
       const adder = await this.userRepository.findOneById(adderId);
+
       if (!adder) throw new DomainError.InvalidUser();
       if (!toAddUser) throw new DomainError.UserNotFound();
       if (!group) throw new DomainError.InvalidGroup();
       if (!group.isUserAdminer(adder)) throw new DomainError.UserNotAdminer();
       if (group.isUserInGroup(toAddUser))
         throw new DomainError.UserAlreadyInGroup();
+
       group.addUserListOnGroup([toAddUser]);
       await this.groupRepository.update(group);
       return group;

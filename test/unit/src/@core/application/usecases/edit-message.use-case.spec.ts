@@ -1,7 +1,7 @@
 import { EditMessageUseCase } from '@application/usecases';
+import { MessageRepositoryStub, UserRepositoryStub } from '@domain-unit/mocks';
 import { GroupEntity, MessageEntity, UserEntity } from '@domain/entities';
 import { DomainError, RepositoryError } from '@domain/errors';
-import { MessageRepository, UserRepository } from '@domain/repositories';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
@@ -28,47 +28,20 @@ const mockedMsg = MessageEntity.create({
     password: 'any_owner_password',
   }),
 });
-class MessageRepositoryStub implements MessageRepository {
-  update(message: MessageEntity): Promise<void> {
-    return;
-  }
 
-  async findById(id: string): Promise<MessageEntity> {
-    return mockedMsg;
-  }
-  delete(message: MessageEntity): Promise<void> {
-    return;
-  }
-  insert(message: MessageEntity): Promise<void> {
-    return;
-  }
-  findByGroup(group: GroupEntity): Promise<MessageEntity[]> {
-    return;
-  }
-}
+const owner = UserEntity.create({
+  id: 'any_owner_id',
+  email: 'any_owner_email',
+  name: 'any_owner_name',
+  password: 'any_owner_password',
+});
 
-class UserRepositoryStub implements UserRepository {
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  async findOneById(id: string): Promise<UserEntity> {
-    return UserEntity.create({
-      id: 'any_owner_id',
-      email: 'any_owner_email',
-      name: 'any_owner_name',
-      password: 'any_owner_password',
-    });
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return;
-  }
-}
+const anotherUser = UserEntity.create({
+  id: 'another_user_id',
+  email: 'another_user_email',
+  name: 'another_user_name',
+  password: 'another_user_password',
+});
 
 type SutTypes = {
   userRepository: UserRepositoryStub;
@@ -79,18 +52,18 @@ const makeSut = (): SutTypes => {
   const userRepository = new UserRepositoryStub();
   const messageRepository = new MessageRepositoryStub();
   const sut = new EditMessageUseCase(userRepository, messageRepository);
+
+  userRepository.findOneById = jest.fn().mockResolvedValue(owner);
+  messageRepository.findById = jest.fn().mockResolvedValue(mockedMsg);
+
   return { sut, messageRepository, userRepository };
 };
 
 describe('EditMessage UseCase (SUIT)', () => {
   it('Should call repository correctly', async () => {
     const { sut, userRepository, messageRepository } = makeSut();
-
-    jest.spyOn(userRepository, 'findOneById');
-    jest.spyOn(messageRepository, 'findById');
-    jest.spyOn(messageRepository, 'update');
-
     const newMessageContent = 'any_new_message_content';
+
     await sut.execute({
       messageId: 'any_message_id',
       currentUserId: 'any_current_user_id',
@@ -107,17 +80,9 @@ describe('EditMessage UseCase (SUIT)', () => {
 
   it('Should throw UserIsntMessageOwner if user isnt message owner', async () => {
     const { sut, userRepository } = makeSut();
-
-    jest.spyOn(userRepository, 'findOneById').mockResolvedValueOnce(
-      Promise.resolve(
-        UserEntity.create({
-          id: 'another_user_id',
-          email: 'another_user_email',
-          name: 'another_user_name',
-          password: 'another_user_password',
-        }),
-      ),
-    );
+    jest
+      .spyOn(userRepository, 'findOneById')
+      .mockResolvedValueOnce(anotherUser);
 
     const promise = sut.execute({
       messageId: 'any_message_id',
@@ -148,7 +113,6 @@ describe('EditMessage UseCase (SUIT)', () => {
 
   it('Should throw Unexpected if user userRepository throws RepositoryError.OperationError', async () => {
     const { sut, userRepository } = makeSut();
-
     jest
       .spyOn(userRepository, 'findOneById')
       .mockRejectedValueOnce(new RepositoryError.OperationError());
@@ -164,8 +128,8 @@ describe('EditMessage UseCase (SUIT)', () => {
 
   it('Should return message on process succeed', async () => {
     const { sut } = makeSut();
-
     const newMessageContent = 'any_new_message_content';
+
     const message = await sut.execute({
       messageId: 'any_message_id',
       currentUserId: 'another_user_id',

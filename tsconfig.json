@@ -23,6 +23,8 @@
       "@domain/*": ["src/@core/domain/*"],
       "@application/*": ["src/@core/application/*"],
       "@presentation/*": ["src/@core/presentation/*"],
+      "@domain-unit/*": ["test/unit/src/@core/domain/*"],
+      "@application-unit/*": ["test/unit/src/@core/application/*"],
     },
   },  
 }

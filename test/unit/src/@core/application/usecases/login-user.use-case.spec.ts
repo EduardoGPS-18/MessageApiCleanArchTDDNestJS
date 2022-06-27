@@ -1,114 +1,67 @@
-import {
-  Encrypter,
-  EncryptProps,
-  Payload,
-  SessionHandler,
-} from '@application/protocols';
+import { EncrypterStub, SessionHandlerStub } from '@application-unit/mocks';
 import { LoginUserUseCase } from '@application/usecases';
+import { UserRepositoryStub } from '@domain-unit/mocks';
 import { UserEntity } from '@domain/entities';
 import { DomainError, RepositoryError } from '@domain/errors';
-import { UserRepository } from '@domain/repositories';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-class UserRepositoryStub implements UserRepository {
-  findOneById(id: string): Promise<UserEntity> {
-    return;
-  }
-  findUserListByIdList(idList: string[]): Promise<UserEntity[]> {
-    return;
-  }
-  update(user: UserEntity): Promise<void> {
-    return;
-  }
-  insert(user: UserEntity): Promise<void> {
-    return;
-  }
-  findOneByEmail(email: string): Promise<UserEntity> {
-    return Promise.resolve(
-      UserEntity.create({
-        id: 'any_id',
-        name: 'any_name',
-        email: 'user_email',
-        password: 'any_hashed_password',
-      }),
-    );
-  }
-}
-
-class EncrypterStub implements Encrypter {
-  compare(props: EncryptProps): Promise<boolean> {
-    return Promise.resolve(true);
-  }
-}
-
-class SessionHandlerStub implements SessionHandler {
-  verifySession(session: string): Payload {
-    return;
-  }
-  generateSession(payload: Payload): string {
-    return 'generated_session';
-  }
-}
+const mockedUser = UserEntity.create({
+  id: 'any_id',
+  name: 'any_name',
+  email: 'user_email',
+  password: 'any_hashed_password',
+});
 
 type SutTypes = {
   sut: LoginUserUseCase;
-  encryptStub: EncrypterStub;
-  userRepositoryStub: UserRepositoryStub;
-  sessionHandlerStub: SessionHandlerStub;
+  encrypt: EncrypterStub;
+  userRepository: UserRepositoryStub;
+  sessionHandler: SessionHandlerStub;
 };
 
 const makeSut = (): SutTypes => {
-  const userRepositoryStub = new UserRepositoryStub();
-  const encryptStub = new EncrypterStub();
-  const sessionHandlerStub = new SessionHandlerStub();
-  const sut = new LoginUserUseCase(
-    encryptStub,
-    userRepositoryStub,
-    sessionHandlerStub,
-  );
-  return { sut, encryptStub, userRepositoryStub, sessionHandlerStub };
+  const encrypt = new EncrypterStub();
+  const userRepository = new UserRepositoryStub();
+  const sessionHandler = new SessionHandlerStub();
+  const sut = new LoginUserUseCase(encrypt, userRepository, sessionHandler);
+
+  sessionHandler.generateSession = jest
+    .fn()
+    .mockReturnValue('generated_session');
+  userRepository.findOneByEmail = jest.fn().mockResolvedValue(mockedUser);
+  encrypt.compare = jest.fn().mockReturnValue(true);
+
+  return { sut, encrypt, userRepository, sessionHandler };
 };
 
 describe('Login User Usecase', () => {
   it('Should call dependencies with correct values', async () => {
-    const { sut, encryptStub, userRepositoryStub, sessionHandlerStub } =
-      makeSut();
-    jest.spyOn(userRepositoryStub, 'findOneByEmail');
-    jest.spyOn(userRepositoryStub, 'update');
-    jest.spyOn(encryptStub, 'compare');
-    jest.spyOn(sessionHandlerStub, 'generateSession');
+    const { sut, encrypt, userRepository, sessionHandler } = makeSut();
+
     await sut.execute({
       email: 'user_email',
       rawPassword: 'user_pass',
     });
-    expect(userRepositoryStub.findOneByEmail).toHaveBeenCalledWith(
-      'user_email',
-    );
-    expect(sessionHandlerStub.generateSession).toHaveBeenCalledWith({
+
+    expect(userRepository.findOneByEmail).toHaveBeenCalledWith('user_email');
+    expect(sessionHandler.generateSession).toHaveBeenCalledWith({
       id: 'any_id',
       email: 'user_email',
     });
-    expect(encryptStub.compare).toHaveBeenCalledWith({
+    expect(encrypt.compare).toHaveBeenCalledWith({
       value: 'user_pass',
       hash: 'any_hashed_password',
     });
-    expect(userRepositoryStub.update).toHaveBeenCalledWith(
-      UserEntity.create({
-        id: 'any_id',
-        email: 'user_email',
-        name: 'any_name',
-        password: 'any_hashed_password',
-        session: 'generated_session',
-      }),
-    );
+    expect(userRepository.update).toHaveBeenCalledWith({
+      ...mockedUser,
+      session: 'generated_session',
+    });
   });
 
   it('Should throw InvalidCredentials if user not found on repository', async () => {
-    const { sut, userRepositoryStub } = makeSut();
-    jest
-      .spyOn(userRepositoryStub, 'findOneByEmail')
-      .mockResolvedValueOnce(null);
+    const { sut, userRepository } = makeSut();
+    jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValueOnce(null);
 
     const promise = sut.execute({
       email: 'any_mail',
@@ -119,8 +72,8 @@ describe('Login User Usecase', () => {
   });
 
   it('Should throw InvalidCredentials if user not found on repository', async () => {
-    const { sut, encryptStub } = makeSut();
-    jest.spyOn(encryptStub, 'compare').mockResolvedValueOnce(false);
+    const { sut, encrypt } = makeSut();
+    jest.spyOn(encrypt, 'compare').mockResolvedValueOnce(false);
 
     const promise = sut.execute({
       email: 'any_mail',
@@ -131,9 +84,9 @@ describe('Login User Usecase', () => {
   });
 
   it('Should throw if repository throws', async () => {
-    const { sut, userRepositoryStub } = makeSut();
+    const { sut, userRepository } = makeSut();
     jest
-      .spyOn(userRepositoryStub, 'findOneByEmail')
+      .spyOn(userRepository, 'findOneByEmail')
       .mockRejectedValueOnce(new RepositoryError.OperationError());
 
     const promise = sut.execute({
@@ -151,14 +104,7 @@ describe('Login User Usecase', () => {
       email: 'user_email',
       rawPassword: 'user_pass',
     });
-    const mockedUser = UserEntity.create({
-      id: 'any_id',
-      name: 'any_name',
-      email: 'user_email',
-      password: 'any_hashed_password',
-      session: 'generated_session',
-    });
 
-    expect(user).toEqual(mockedUser);
+    expect(user).toEqual({ ...mockedUser, session: 'generated_session' });
   });
 });
