@@ -17,7 +17,7 @@ export class GroupWebSocketProviderGateway
   constructor(private readonly validateUser: ValidateUserUseCaseI) {}
 
   clients: { userId: string; client: Socket }[] = [];
-  clientByUserId(userId: string): Socket {
+  clientByUserId(userId: string): Socket | undefined {
     try {
       return this.clients.filter((value) => value.userId == userId)[0].client;
     } catch (err) {
@@ -34,14 +34,14 @@ export class GroupWebSocketProviderGateway
       }
       const user = await this.validateUser.execute({ session });
       this.clients.push({ userId: user.id, client: client });
-      PresentationHelpers.addUserToObject(client.data.user, user);
+      PresentationHelpers.addUserToObject(client.data, user);
     } catch (err) {
       client.disconnect();
     }
   }
   async handleDisconnect(client: Socket) {
     this.clients = this.clients.filter((value) => {
-      return value.userId !== client.data.user.id;
+      return !client.data.user || value.userId !== client.data.user.id;
     });
   }
 
@@ -49,19 +49,27 @@ export class GroupWebSocketProviderGateway
     userId: string,
     group: GroupEntity,
   ): Promise<void> {
-    this.clientByUserId(userId).emit(
-      'added-to-group',
-      GroupMapper.toDtoWithoutMessages(group),
-    );
+    try {
+      this.clientByUserId(userId)?.emit(
+        'added-to-group',
+        GroupMapper.toDtoWithoutMessages(group),
+      );
+    } catch (err) {
+      return;
+    }
   }
 
   async emitToUserRemovedFromGroup(
     userId: string,
     group: GroupEntity,
   ): Promise<void> {
-    this.clientByUserId(userId).emit(
-      'remove-from-group',
-      GroupMapper.toDtoWithoutMessages(group),
-    );
+    try {
+      this.clientByUserId(userId)?.emit(
+        'remove-from-group',
+        GroupMapper.toDtoWithoutMessages(group),
+      );
+    } catch (err) {
+      return;
+    }
   }
 }

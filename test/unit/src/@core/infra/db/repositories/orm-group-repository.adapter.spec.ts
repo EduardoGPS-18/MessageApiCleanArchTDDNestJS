@@ -45,8 +45,8 @@ const makeSut = (): SutTypes => {
   ormGroupRepository.save = jest.fn();
   ormGroupRepository.findOneBy = jest.fn();
   ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-    innerJoin: jest.fn().mockReturnValue({
-      innerJoinAndMapOne: jest.fn().mockReturnValue({
+    leftJoin: jest.fn().mockReturnValue({
+      leftJoinAndMapOne: jest.fn().mockReturnValue({
         innerJoin: jest.fn().mockReturnValue({
           getMany: jest.fn(),
         }),
@@ -160,22 +160,20 @@ describe('OrmGroup || RepositoryAdapter || Suit', () => {
       await sut.findByUser(mockedUser);
 
       expect(ormGroupRepository.createQueryBuilder).toBeCalledWith('group');
-      expect(
-        ormGroupRepository.createQueryBuilder('').innerJoin,
-      ).toBeCalledWith(
+      expect(ormGroupRepository.createQueryBuilder('').leftJoin).toBeCalledWith(
         'users-group',
         'user-group',
         'user-group.group_id = group.id',
       );
       expect(
-        ormGroupRepository.createQueryBuilder('').innerJoin('', '')
-          .innerJoinAndMapOne,
+        ormGroupRepository.createQueryBuilder('').leftJoin('', '')
+          .leftJoinAndMapOne,
       ).toBeCalledWith('group.owner', 'user', 'u', 'u.id = group.owner.id');
       expect(
         ormGroupRepository
           .createQueryBuilder('')
-          .innerJoin('', '')
-          .innerJoinAndMapOne('', '', '').innerJoin,
+          .leftJoin('', '')
+          .leftJoinAndMapOne('', '', '').innerJoin,
       ).toBeCalledWith(
         'user',
         'user',
@@ -187,8 +185,8 @@ describe('OrmGroup || RepositoryAdapter || Suit', () => {
       expect(
         ormGroupRepository
           .createQueryBuilder('')
-          .innerJoin('', '')
-          .innerJoinAndMapOne('', '', '')
+          .leftJoin('', '')
+          .leftJoinAndMapOne('', '', '')
           .innerJoin('', '').getMany,
       ).toBeCalledTimes(1);
     });
@@ -196,8 +194,8 @@ describe('OrmGroup || RepositoryAdapter || Suit', () => {
     it('Should return same of orm', async () => {
       const { sut, ormGroupRepository } = makeSut();
       ormGroupRepository.createQueryBuilder = jest.fn().mockReturnValue({
-        innerJoin: jest.fn().mockReturnValue({
-          innerJoinAndMapOne: jest.fn().mockReturnValue({
+        leftJoin: jest.fn().mockReturnValue({
+          leftJoinAndMapOne: jest.fn().mockReturnValue({
             innerJoin: jest.fn().mockReturnValue({
               getMany: jest
                 .fn()

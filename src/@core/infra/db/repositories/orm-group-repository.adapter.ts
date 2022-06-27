@@ -11,12 +11,8 @@ export class OrmGroupRepositoryAdapter implements GroupRepository {
       const { id: userId } = user;
       const groups = await this.ormGroupRepository
         .createQueryBuilder('group')
-        .innerJoin(
-          'users-group',
-          'user-group',
-          'user-group.group_id = group.id',
-        )
-        .innerJoinAndMapOne('group.owner', 'user', 'u', 'u.id = group.owner.id')
+        .leftJoin('users-group', 'user-group', 'user-group.group_id = group.id')
+        .leftJoinAndMapOne('group.owner', 'user', 'u', 'u.id = group.owner.id')
         .innerJoin(
           'user',
           'user',

@@ -100,7 +100,7 @@ describe('GroupWebSocketProvider || Gateway || Suit', () => {
 
       await sut.handleConnection(currentUserClient);
       expect(PresentationHelpers.addUserToObject).toBeCalledWith(
-        currentUserClient.data.user,
+        currentUserClient.data,
         UserEntity.create({
           id: 'any_user_id',
           email: 'any_user_email',
