@@ -34,7 +34,6 @@ import { GroupSchema, MessageScheme, UserSchema } from '@infra/db/typeorm';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 import {
   AddUserToGroupController,
   CreateGroupController,
@@ -51,6 +50,7 @@ import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupWebSocketProviderI } from '@presentation/protocols';
 import { GroupWebSocketProviderGateway } from '@presentation/providers';
 import { DataSource } from 'typeorm';
+import { databaseProvider } from './data-source';
 
 @Module({
   imports: [
@@ -64,25 +64,10 @@ import { DataSource } from 'typeorm';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        type: 'postgres',
-        database: config.get('DB_NAME'),
-        host: config.get('DB_HOST'),
-        port: config.get('DB_PORT'),
-        username: config.get('DB_USER'),
-        password: config.get('DB_PASSWORD'),
-        entities: [__dirname + './**/**/**/*.scheme{.ts,.js}'],
-        synchronize: true,
-        autoLoadEntities: true,
-      }),
-    }),
-    TypeOrmModule.forFeature([UserSchema, GroupSchema, MessageScheme]),
   ],
   providers: [
     //PROTOCOLS
+    ...databaseProvider,
     {
       provide: SessionHandler,
       useFactory: (configService: ConfigService, jwtService: JwtService) => {
@@ -105,7 +90,7 @@ import { DataSource } from 'typeorm';
         const ormGroupRepo = dataSource.getRepository(GroupSchema);
         return new OrmGroupRepositoryAdapter(ormGroupRepo);
       },
-      inject: [getDataSourceToken()],
+      inject: ['DATA_SOURCE'],
     },
     {
       provide: MessageRepository,
@@ -113,7 +98,7 @@ import { DataSource } from 'typeorm';
         const ormMessageRepo = dataSource.getRepository(MessageScheme);
         return new OrmMessageRepositoryAdapter(ormMessageRepo);
       },
-      inject: [getDataSourceToken()],
+      inject: ['DATA_SOURCE'],
     },
     {
       provide: UserRepository,
@@ -121,7 +106,7 @@ import { DataSource } from 'typeorm';
         const ormUserRepo = dataSource.getRepository(UserSchema);
         return new OrmUserRepositoryAdapter(ormUserRepo);
       },
-      inject: [getDataSourceToken()],
+      inject: ['DATA_SOURCE'],
     },
     //USE CASES
     {
@@ -244,6 +229,7 @@ import { DataSource } from 'typeorm';
     SendMessageGateway,
     DeleteMessageGateway,
   ],
+  exports: [...databaseProvider],
   controllers: [
     LoginController,
     SignupController,
