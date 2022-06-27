@@ -1,7 +1,4 @@
-import {
-  AddUserToGroupProps,
-  AddUserToGroupUseCaseI,
-} from '@application/usecases';
+import { AddUserToGroupUseCaseStub } from '@application-unit/mocks/usecases';
 import { GroupEntity, UserEntity } from '@domain/entities';
 import { DomainError } from '@domain/errors';
 import {
@@ -9,25 +6,21 @@ import {
   ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { GroupWebSocketProviderStub } from '@presentation-unit/mocks';
 import { AddUserToGroupController } from '@presentation/controllers';
-import { GroupWebSocketProviderI } from '@presentation/protocols';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-class GroupWebSocketProviderStub implements GroupWebSocketProviderI {
-  emitToUserAddedToGroup(userId: string, group: GroupEntity): Promise<void> {
-    return;
-  }
-  emitToUserRemovedFromGroup(
-    userId: string,
-    group: GroupEntity,
-  ): Promise<void> {
-    return;
-  }
-}
+const currentUserMock = UserEntity.create({
+  id: 'current_user_id',
+  email: 'current_user_email',
+  name: 'current_user_name',
+  password: 'current_user_password',
+});
 
-const addUserToGroupReturn = GroupEntity.create({
+const addUserToGroup = GroupEntity.create({
   id: 'any_group_id',
+  name: 'any_group_name',
   description: 'any_group_description',
   messages: [],
   users: [
@@ -38,46 +31,30 @@ const addUserToGroupReturn = GroupEntity.create({
       password: 'added_user_password',
     }),
   ],
-  name: 'any_group_name',
-  owner: UserEntity.create({
-    id: 'current_user_id',
-    email: 'current_user_email',
-    name: 'current_user_name',
-    password: 'current_user_password',
-  }),
+  owner: currentUserMock,
 });
 
-class AddUserToGroupUseCaseStub implements AddUserToGroupUseCaseI {
-  async execute(props: AddUserToGroupProps): Promise<GroupEntity> {
-    return addUserToGroupReturn;
-  }
-}
-
 type SutTypes = {
-  addUserToGroupUseCaseStub: AddUserToGroupUseCaseStub;
-  currentUserMock: UserEntity;
+  addUserToGroupUseCase: AddUserToGroupUseCaseStub;
   groupWebSocket: GroupWebSocketProviderStub;
   sut: AddUserToGroupController;
 };
-const makeSut = () => {
+const makeSut = (): SutTypes => {
   const addUserToGroupUseCase = new AddUserToGroupUseCaseStub();
   const groupWebSocket = new GroupWebSocketProviderStub();
   const sut = new AddUserToGroupController(
     addUserToGroupUseCase,
     groupWebSocket,
   );
-  const currentUserMock = UserEntity.create({
-    id: 'current_user_id',
-    email: 'current_user_email',
-    name: 'current_user_name',
-    password: 'current_user_password',
-  });
-  return { sut, addUserToGroupUseCase, currentUserMock, groupWebSocket };
+
+  addUserToGroupUseCase.execute = jest.fn().mockResolvedValue(addUserToGroup);
+
+  return { sut, addUserToGroupUseCase, groupWebSocket };
 };
 
-describe('Add User To Group Controller Suit', () => {
+describe('AddUserToGroup || Controller || Suit', () => {
   it('Should call usecase correctly', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest.spyOn(addUserToGroupUseCase, 'execute');
 
     await sut.handle(currentUserMock, {
@@ -93,7 +70,7 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should throw ServerError if usecase throws Unexpected', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest
       .spyOn(addUserToGroupUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.Unexpected());
@@ -107,7 +84,7 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should throw BadRequest when usecase throws UserNotFound', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest
       .spyOn(addUserToGroupUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.UserNotFound());
@@ -121,7 +98,7 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should throw BadRequest when usecase throws InvalidGroup', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest
       .spyOn(addUserToGroupUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.InvalidGroup());
@@ -135,7 +112,7 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should throw BadRequest when usecase throws UserAlreadyInGroup', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest
       .spyOn(addUserToGroupUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.UserAlreadyInGroup());
@@ -149,7 +126,7 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should throw Forbidden when usecase throws InvalidUser', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest
       .spyOn(addUserToGroupUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.InvalidUser());
@@ -163,7 +140,7 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should throw Forbidden when usecase throws UserNotAdminer', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock } = makeSut();
+    const { sut, addUserToGroupUseCase } = makeSut();
     jest
       .spyOn(addUserToGroupUseCase, 'execute')
       .mockRejectedValueOnce(new DomainError.UserNotAdminer());
@@ -177,17 +154,18 @@ describe('Add User To Group Controller Suit', () => {
   });
 
   it('Should return a group without messages and emit to user on success', async () => {
-    const { sut, addUserToGroupUseCase, currentUserMock, groupWebSocket } =
-      makeSut();
+    const { sut, addUserToGroupUseCase, groupWebSocket } = makeSut();
     jest.spyOn(addUserToGroupUseCase, 'execute');
     jest.spyOn(groupWebSocket, 'emitToUserAddedToGroup');
+
     const group = await sut.handle(currentUserMock, {
       groupId: 'any_group_id',
       userId: 'any_user_to_add_id',
     });
+
     expect(groupWebSocket.emitToUserAddedToGroup).toBeCalledWith(
       'any_user_to_add_id',
-      addUserToGroupReturn,
+      addUserToGroup,
     );
     expect(group).toEqual({
       id: 'any_group_id',

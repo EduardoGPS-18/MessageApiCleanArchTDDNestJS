@@ -1,4 +1,4 @@
-import { SessionHandlerStub } from '@application-unit/mocks';
+import { SessionHandlerStub } from '@application-unit/mocks/protocols';
 import { ValidateUserUseCase } from '@application/usecases';
 import { UserRepositoryStub } from '@domain-unit/mocks';
 import { UserEntity } from '@domain/entities';

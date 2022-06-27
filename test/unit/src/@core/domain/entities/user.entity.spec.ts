@@ -2,7 +2,7 @@ import { UserEntity } from '@domain/entities';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-describe('User Entity Test', () => {
+describe('User || Entity || Suit', () => {
   it('Should create a user with correct data', () => {
     const id = 'any_id';
     const email = 'any_email';

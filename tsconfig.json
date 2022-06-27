@@ -25,6 +25,7 @@
       "@presentation/*": ["src/@core/presentation/*"],
       "@domain-unit/*": ["test/unit/src/@core/domain/*"],
       "@application-unit/*": ["test/unit/src/@core/application/*"],
+      "@presentation-unit/*": ["test/unit/src/@core/presentation/*"],
     },
   },  
 }

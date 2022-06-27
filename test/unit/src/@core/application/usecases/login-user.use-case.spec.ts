@@ -1,4 +1,7 @@
-import { EncrypterStub, SessionHandlerStub } from '@application-unit/mocks';
+import {
+  EncrypterStub,
+  SessionHandlerStub,
+} from '@application-unit/mocks/protocols';
 import { LoginUserUseCase } from '@application/usecases';
 import { UserRepositoryStub } from '@domain-unit/mocks';
 import { UserEntity } from '@domain/entities';

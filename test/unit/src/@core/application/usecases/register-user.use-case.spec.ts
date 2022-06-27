@@ -2,7 +2,10 @@ import * as crypto from 'crypto'; // (* as mod) CUIDADO AO IMPORTAR !
 
 import { DomainError, RepositoryError } from '@domain/errors';
 
-import { HasherStub, SessionHandlerStub } from '@application-unit/mocks';
+import {
+  HasherStub,
+  SessionHandlerStub,
+} from '@application-unit/mocks/protocols';
 import { RegisterUserUseCase } from '@application/usecases';
 import { UserRepositoryStub } from '@domain-unit/mocks';
 import { UserEntity } from '@domain/entities';
