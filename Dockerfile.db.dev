@@ -1,7 +1,5 @@
 FROM postgres:14.3
 
 EXPOSE 5432
-ENV POSTGRES_PASSWORD=senha123
-ENV POSTGRES_USER=docker
 
 COPY ./initial-scripts/create-databases.sh /docker-entrypoint-initdb.d/

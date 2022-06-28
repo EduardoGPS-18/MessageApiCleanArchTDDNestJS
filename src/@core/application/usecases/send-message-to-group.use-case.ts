@@ -12,9 +12,11 @@ export type SendMessageToGroupProps = {
   messageContent: string;
   senderId: string;
 };
+
 export abstract class SendMessageToGroupUseCaseI {
   abstract execute(props: SendMessageToGroupProps): Promise<MessageEntity>;
 }
+
 export class SendMessageToGroupUseCase implements SendMessageToGroupUseCaseI {
   constructor(
     private readonly groupRepository: GroupRepository,

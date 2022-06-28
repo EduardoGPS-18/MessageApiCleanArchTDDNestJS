@@ -12,13 +12,14 @@
     "start": "ENV=dev nest start",
     "start:dev": "ENV=dev nest start --watch",
     "start:debug": "ENV=dev nest start --debug --watch",
-    "start:prod": "ENV=prod node dist/main",
+    "start:prod": "ENV=prod node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "ENV=test jest",
     "test:watch": "ENV=test jest --watch --config jest.config.ts",
     "test:cov": "ENV=test jest --coverage",
     "test:debug": "ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "ENV=test jest --config ./test/jest-e2e.json"
+    "test:e2e": "ENV=test jest --config ./test/jest-e2e.json",
+    "migrate:generate": "npx ts-node ./node_modules/typeorm/cli migration:generate"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",
@@ -31,6 +32,7 @@
     "@nestjs/websockets": "^8.4.7",
     "@types/bcrypt": "^5.0.0",
     "bcrypt": "^5.0.1",
+    "dotenv": "^16.0.1",
     "mysql2": "^2.3.3",
     "passport-jwt": "^4.0.0",
     "pg": "^8.7.3",
