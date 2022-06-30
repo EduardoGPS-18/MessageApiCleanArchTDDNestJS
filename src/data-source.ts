@@ -1,25 +1,27 @@
 import dotenv from 'dotenv';
+import { join } from 'path';
 import { DataSource } from 'typeorm';
-
-dotenv.config({ path: '.env.dev' });
-
-export const databaseProvider = [
-  {
-    provide: 'DATA_SOURCE',
-    useFactory: async () => {
-      return appDataSource.initialize();
-    },
-  },
-];
+dotenv.config({ path: `.env.${process.env.ENV}` });
 
 export const appDataSource = new DataSource({
   type: 'postgres',
-  database: process.env.DB_NAME,
-  host: process.env.DB_HOST,
-  username: process.env.DB_USER,
-  port: Number(process.env.DB_PORT),
-  password: process.env.DB_PASSWORD,
-  entities: [__dirname + '/@core/infra/db/typeorm/*.schema.*'],
-  migrations: [__dirname + '/@core/infra/db/migrations/*'],
+
+  ...(process.env.DB_URL
+    ? {
+        url: process.env.DB_URL,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+    : {
+        database: process.env.DB_NAME,
+        host: process.env.DB_HOST,
+        username: process.env.DB_USER,
+        port: Number(process.env.DB_PORT),
+        password: process.env.DB_PASSWORD,
+      }),
+  synchronize: true,
+  entities: [join(__dirname, '/@core/infra/db/typeorm/*.schema.*')],
+  migrations: [join(__dirname, '/migrations/', '*.js')],
   migrationsTableName: 'migrations',
 });

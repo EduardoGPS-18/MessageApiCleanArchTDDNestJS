@@ -19,7 +19,8 @@
     "test:cov": "ENV=test jest --coverage",
     "test:debug": "ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "ENV=test jest --config ./test/jest-e2e.json",
-    "migrate:generate": "npx ts-node ./node_modules/typeorm/cli migration:generate"
+    "migration:generate": "ENV=dev npx ts-node ./node_modules/typeorm/cli migration:generate",
+    "migration:run": "ENV=test npx ts-node ./node_modules/typeorm/cli migration:run -d"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

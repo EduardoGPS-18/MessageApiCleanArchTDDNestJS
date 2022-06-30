@@ -6,5 +6,6 @@ export * from './get-group-message-list.use-case.stub';
 export * from './get-user-group-list.use-case.stub';
 export * from './login-user.use-case.stub';
 export * from './register-user.use-case.stub';
+export * from './remove-user-from-group.controller.stub';
 export * from './send-message-to-group.use-case.stub';
 export * from './validate-user.use-case.stub';

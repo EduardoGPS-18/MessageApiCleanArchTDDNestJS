@@ -1,3 +1,0 @@
-FROM postgres:14.3
-
-COPY ./initial-scripts/create-databases.sh /docker-entrypoint-initdb.d/

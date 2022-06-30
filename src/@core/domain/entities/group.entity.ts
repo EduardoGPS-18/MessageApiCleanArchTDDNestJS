@@ -57,6 +57,11 @@ export class GroupEntity {
     });
   }
 
+  removeUserListFromGroup(users: UserEntity[]) {
+    const usersIds = users.map((user) => user?.id);
+    this.users = this.users.filter((user) => !usersIds.includes(user?.id));
+  }
+
   public static create(createGroupProps: CreateGroupProps): GroupEntity {
     const now = new Date();
     return new GroupEntity(

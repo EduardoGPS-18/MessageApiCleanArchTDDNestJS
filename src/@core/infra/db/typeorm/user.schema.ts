@@ -5,7 +5,6 @@ export const UserSchema = new EntitySchema<UserEntity>({
   name: UserEntity.name,
   tableName: 'user',
   target: UserEntity,
-  synchronize: true,
   columns: {
     id: {
       type: 'uuid',

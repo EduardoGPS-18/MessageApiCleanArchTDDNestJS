@@ -5,7 +5,6 @@ export const GroupSchema = new EntitySchema<GroupEntity>({
   name: GroupEntity.name,
   tableName: 'group',
   target: GroupEntity,
-  synchronize: true,
   relations: {
     users: {
       target: UserEntity.name,

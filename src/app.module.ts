@@ -14,6 +14,8 @@ import {
   LoginUserUseCaseI,
   RegisterUserUseCase,
   RegisterUserUseCaseI,
+  RemoveUserFromGroupUseCase,
+  RemoveUserFromGroupUseCaseI,
   SendMessageToGroupUseCase,
   SendMessageToGroupUseCaseI,
   ValidateUserUseCase,
@@ -34,12 +36,14 @@ import { GroupSchema, MessageScheme, UserSchema } from '@infra/db/typeorm';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 import {
   AddUserToGroupController,
   CreateGroupController,
   GetGroupMessageListController,
   GetUserGroupListController,
   LoginController,
+  RemoveUserFromGroupController,
   SignupController,
 } from '@presentation/controllers';
 import {
@@ -50,7 +54,7 @@ import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupWebSocketProviderI } from '@presentation/protocols';
 import { GroupWebSocketProviderGateway } from '@presentation/providers';
 import { DataSource } from 'typeorm';
-import { databaseProvider } from './data-source';
+import { appDataSource } from './data-source';
 
 @Module({
   imports: [
@@ -64,10 +68,16 @@ import { databaseProvider } from './data-source';
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forRootAsync({
+      dataSourceFactory: async () => {
+        return appDataSource.initialize();
+      },
+      useFactory: () => ({}),
+    }),
+    TypeOrmModule.forFeature([UserSchema, GroupSchema, MessageScheme]),
   ],
   providers: [
     //PROTOCOLS
-    ...databaseProvider,
     {
       provide: SessionHandler,
       useFactory: (configService: ConfigService, jwtService: JwtService) => {
@@ -90,7 +100,7 @@ import { databaseProvider } from './data-source';
         const ormGroupRepo = dataSource.getRepository(GroupSchema);
         return new OrmGroupRepositoryAdapter(ormGroupRepo);
       },
-      inject: ['DATA_SOURCE'],
+      inject: [getDataSourceToken()],
     },
     {
       provide: MessageRepository,
@@ -98,7 +108,7 @@ import { databaseProvider } from './data-source';
         const ormMessageRepo = dataSource.getRepository(MessageScheme);
         return new OrmMessageRepositoryAdapter(ormMessageRepo);
       },
-      inject: ['DATA_SOURCE'],
+      inject: [getDataSourceToken()],
     },
     {
       provide: UserRepository,
@@ -106,7 +116,7 @@ import { databaseProvider } from './data-source';
         const ormUserRepo = dataSource.getRepository(UserSchema);
         return new OrmUserRepositoryAdapter(ormUserRepo);
       },
-      inject: ['DATA_SOURCE'],
+      inject: [getDataSourceToken()],
     },
     //USE CASES
     {
@@ -225,17 +235,32 @@ import { databaseProvider } from './data-source';
       provide: GroupWebSocketProviderI,
       useExisting: GroupWebSocketProviderGateway,
     },
+    {
+      provide: RemoveUserFromGroupUseCaseI,
+      useFactory: (
+        userRepository: UserRepository,
+        groupRepository: GroupRepository,
+      ) => {
+        return new RemoveUserFromGroupUseCase(userRepository, groupRepository);
+      },
+      inject: [UserRepository, GroupRepository],
+    },
     GroupWebSocketProviderGateway,
+    // Messages
     SendMessageGateway,
     DeleteMessageGateway,
   ],
-  exports: [...databaseProvider],
   controllers: [
+    // Auth
     LoginController,
     SignupController,
+    // Group
     CreateGroupController,
+    // Group - Messages
     GetGroupMessageListController,
+    //User - Group
     AddUserToGroupController,
+    RemoveUserFromGroupController,
     GetUserGroupListController,
   ],
 })

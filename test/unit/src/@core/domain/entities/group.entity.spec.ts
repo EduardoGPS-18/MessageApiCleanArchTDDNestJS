@@ -336,4 +336,96 @@ describe('Group || Entity || Suit', () => {
       expect(group.isUserInGroup(anyUser)).toBe(false);
     });
   });
+
+  describe('is user group adminer', () => {
+    it('Should return true if user is owner', () => {
+      const owner = UserEntity.create({
+        id: 'any_owner_id',
+        email: 'any_owner_email',
+        name: 'any_owner_name',
+        password: 'any_owner_password',
+        session: 'any_owner_session',
+      });
+
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: owner,
+        users: [],
+      });
+
+      expect(group.isUserAdminer(owner)).toBe(true);
+    });
+
+    it('Should return false if user isnt owner', () => {
+      const owner = UserEntity.create({
+        id: 'any_owner_id',
+        email: 'any_owner_email',
+        name: 'any_owner_name',
+        password: 'any_owner_password',
+        session: 'any_owner_session',
+      });
+      const anyUser = UserEntity.create({
+        id: 'any_user_id',
+        email: 'any_user_email',
+        name: 'any_user_name',
+        password: 'any_user_password',
+        session: 'any_user_session',
+      });
+      const group = GroupEntity.create({
+        id: 'any_id',
+        name: 'any_name',
+        description: 'any_description',
+        messages: [],
+        owner: owner,
+        users: [],
+      });
+
+      expect(group.isUserInGroup(anyUser)).toBe(false);
+    });
+  });
+
+  describe('removeUserListFromGroup', () => {
+    const owner = UserEntity.create({
+      id: 'any_owner_id',
+      email: 'any_owner_email',
+      name: 'any_owner_name',
+      password: 'any_owner_password',
+      session: 'any_owner_session',
+    });
+
+    const user = UserEntity.create({
+      id: 'any_owner_id',
+      email: 'any_owner_email',
+      name: 'any_owner_name',
+      password: 'any_owner_password',
+      session: 'any_owner_session',
+    });
+
+    const group = GroupEntity.create({
+      id: 'any_id',
+      name: 'any_name',
+      description: 'any_description',
+      messages: [],
+      owner: owner,
+      users: [user],
+    });
+    it('Should remove user of group', () => {
+      group.removeUserListFromGroup([user]);
+      expect(group).toEqual({ ...group, users: [] });
+    });
+
+    it('Shouldnt happens nothing if user try to remove user out of a group', () => {
+      group.users = [];
+      group.removeUserListFromGroup([user]);
+      expect(group).toEqual(group);
+    });
+
+    it('Shouldnt happens nothing if user list is empty', () => {
+      group.removeUserListFromGroup([]);
+      expect(group).toEqual(group);
+    });
+  });
 });

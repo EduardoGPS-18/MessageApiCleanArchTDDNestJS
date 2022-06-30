@@ -5,7 +5,6 @@ export const MessageScheme = new EntitySchema<MessageEntity>({
   name: MessageEntity.name,
   tableName: 'message',
   target: MessageEntity,
-  synchronize: true,
   relations: {
     sender: {
       target: UserEntity.name,

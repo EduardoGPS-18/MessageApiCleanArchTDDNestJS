@@ -6,5 +6,6 @@ export * from './get-group-messages.use-case';
 export * from './get-user-group-list.use-case';
 export * from './login-user.use-case';
 export * from './register-user.use-case';
+export * from './remove-user-from-group.use-case';
 export * from './send-message-to-group.use-case';
 export * from './validate-user.use-case';
