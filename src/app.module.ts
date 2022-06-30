@@ -71,6 +71,9 @@ import { appDataSource } from './data-source';
     }),
     TypeOrmModule.forRootAsync({
       dataSourceFactory: async () => {
+        if (process.env.ENV === 'prod') {
+          appDataSource.runMigrations();
+        }
         return appDataSource.initialize();
       },
       useFactory: () => ({}),
