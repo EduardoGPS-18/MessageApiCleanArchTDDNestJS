@@ -1,0 +1,14 @@
+{
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "test"
+      }
+    },
+    "prod": {
+      "scripts": {
+        "postdeploy": "yarn run migration:run"
+      }
+    }
+  }
+}
