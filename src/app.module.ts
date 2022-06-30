@@ -6,6 +6,8 @@ import {
   CreateGroupUseCaseI,
   DeleteMessageUseCase,
   DeleteMessageUseCaseI,
+  EditMessageUseCase,
+  EditMessageUseCaseI,
   GetGroupMessageListUseCase,
   GetGroupMessageListUseCaseI,
   GetUserGroupListUseCase,
@@ -183,6 +185,16 @@ import { appDataSource } from './data-source';
         );
       },
       inject: [GroupRepository, UserRepository, MessageRepository],
+    },
+    {
+      provide: EditMessageUseCaseI,
+      useFactory: (
+        userRepository: UserRepository,
+        messageRepository: MessageRepository,
+      ) => {
+        return new EditMessageUseCase(userRepository, messageRepository);
+      },
+      inject: [UserRepository, MessageRepository],
     },
     {
       provide: GetGroupMessageListUseCaseI,
