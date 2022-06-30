@@ -48,6 +48,7 @@ import {
 } from '@presentation/controllers';
 import {
   DeleteMessageGateway,
+  EditMessageGateway,
   SendMessageGateway,
 } from '@presentation/gateways';
 import { JwtAuthGuard } from '@presentation/helpers/guard';
@@ -249,6 +250,7 @@ import { appDataSource } from './data-source';
     // Messages
     SendMessageGateway,
     DeleteMessageGateway,
+    EditMessageGateway,
   ],
   controllers: [
     // Auth
