@@ -57,7 +57,7 @@ import { JwtAuthGuard } from '@presentation/helpers/guard';
 import { GroupWebSocketProviderI } from '@presentation/protocols';
 import { GroupWebSocketProviderGateway } from '@presentation/providers';
 import { DataSource } from 'typeorm';
-import { appDataSource } from './data-source';
+import appDataSource from './data-source';
 
 @Module({
   imports: [
