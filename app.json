@@ -2,12 +2,12 @@
   "environments": {
     "test": {
       "scripts": {
-        "test": "yarn && yarn run test"
+        "test": "npm install -g yarn && yarn && yarn run test"
       }
     },
     "prod": {
       "scripts": {
-        "postdeploy": "yarn && yarn run migration:run"
+        "postdeploy": "npm install -g yarn && yarn && yarn run migration:run"
       }
     }
   }
