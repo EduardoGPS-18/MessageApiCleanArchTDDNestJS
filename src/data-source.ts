@@ -20,6 +20,7 @@ export const appDataSource = new DataSource({
         port: Number(process.env.DB_PORT),
         password: process.env.DB_PASSWORD,
       }),
+  migrationsRun: process.env.ENV === 'prod',
   synchronize: true,
   entities: [join(__dirname, '/@core/infra/db/typeorm/*.schema.*')],
   migrations: [join(__dirname, '/migrations/', '*.js')],
