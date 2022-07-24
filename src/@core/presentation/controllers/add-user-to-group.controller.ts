@@ -31,7 +31,7 @@ export class AddUserToGroupController {
     try {
       const { groupId, userId } = addUserToGroupDto;
       const adderId = user.id;
-
+      console.log("teste");
       const group = await this.addUserToGroupUseCase.execute({
         userId,
         adderId,
